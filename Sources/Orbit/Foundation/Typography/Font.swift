@@ -9,9 +9,9 @@ public extension Font {
 
     /// Fonts used for rendering text in Orbit.
     static var orbitFonts: [Font.Weight: URL?] = [
-        .regular: Bundle.current.url(forResource: "CircularPro-Book.otf", withExtension: nil),
-        .medium: Bundle.current.url(forResource: "CircularPro-Medium.otf", withExtension: nil),
-        .bold: Bundle.current.url(forResource: "CircularPro-Bold.otf", withExtension: nil)
+        .regular: Bundle.current.url(forResource: "Zuper-Regular.otf", withExtension: nil),
+        .medium: Bundle.current.url(forResource: "Zuper-Medium.otf", withExtension: nil),
+        .bold: Bundle.current.url(forResource: "Zuper-Bold.otf", withExtension: nil)
     ]
 
     /// Creates Orbit font.
@@ -36,6 +36,20 @@ public extension Font {
 
     /// Registers Orbit fonts set in the `orbitTextFonts` property
     static func registerOrbitFonts() {
+
+        if let iconsFontURL = Bundle.current.url(forResource: "Icons.ttf", withExtension: nil) {
+            _ = registerFont(at: iconsFontURL)
+        }
+
+        for case let (weight, url?) in orbitFonts {
+            guard let font = registerFont(at: url) else { continue }
+
+            orbitFontNames[weight] = font.postScriptName as String?
+        }
+    }
+    
+    /// Registers Orbit fonts set in the `zuperTextFonts` property
+    static func registerZuperFonts() {
 
         if let iconsFontURL = Bundle.current.url(forResource: "Icons.ttf", withExtension: nil) {
             _ = registerFont(at: iconsFontURL)
