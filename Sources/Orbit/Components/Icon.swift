@@ -497,3 +497,13 @@ struct IconDynamicTypePreviews: PreviewProvider {
         IconPreviews.storybookMix
     }
 }
+
+struct IconUsagePreview: PreviewProvider{
+    
+    static var previews: some View{
+        HStack{
+            Icon(image: Image(systemName: "circle.fill"))
+            Icon(image: Image("TicketFlexi", bundle: .current))
+        }
+    }
+}
