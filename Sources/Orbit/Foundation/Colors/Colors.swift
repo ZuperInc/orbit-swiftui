@@ -120,24 +120,12 @@ public extension Color {
     // MARK: - Product
     /// Orbit Product Dark color.
     static let productDark = Color("Product Dark", bundle: .current)
-    /// Orbit Product Dark Active color.
-    static let productDarkActive = Color("Product Dark Active", bundle: .current)
-    /// Orbit Product Dark Hover color.
-    static let productDarkHover = Color("Product Dark Hover", bundle: .current)
     /// Orbit Product Darker color.
     static let productDarker = Color("Product Darker", bundle: .current)
     /// Orbit Product Light color.
     static let productLight = Color("Product Light", bundle: .current)
-    /// Orbit Product Light Active color.
-    static let productLightActive = Color("Product Light Active", bundle: .current)
-    /// Orbit Product Light Hover color.
-    static let productLightHover = Color("Product Light Hover", bundle: .current)
     /// Orbit Product Normal color.
     static let productNormal = Color("Product Normal", bundle: .current)
-    /// Orbit Product Normal Active color.
-    static let productNormalActive = Color("Product Normal Active", bundle: .current)
-    /// Orbit Product Normal Hover color.
-    static let productNormalHover = Color("Product Normal Hover", bundle: .current)
 
     // MARK: - Red
     /// Orbit Red Dark color.
@@ -176,4 +164,12 @@ public extension Color {
     static let whiteActive = Color("White Active", bundle: .current)
     /// Orbit White Hover color.
     static let whiteHover = Color("White Hover", bundle: .current)
+    
+    // MARK: - Icon
+    /// Zuper Icon Primary color.
+    static let iconPrimary = Color("Icon Primary", bundle: .current)
+    /// Zuper Icon Primary color.
+    static let iconSecondary = Color("Icon Secondary", bundle: .current)
+    /// Zuper Icon Primary color.
+    static let iconTertiary = Color("Icon Tertiary", bundle: .current)
 }

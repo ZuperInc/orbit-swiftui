@@ -196,8 +196,8 @@ extension Button {
         
         @ViewBuilder public var backgroundActive: some View {
             switch self {
-                case .primary:                  Color.productNormalActive
-                case .primarySubtle:            Color.productLightActive
+                case .primary:                  Color.productNormal
+                case .primarySubtle:            Color.productLight
                 case .secondary:                Color.cloudNormalActive
                 case .critical:                 Color.redNormalActive
                 case .criticalSubtle:           Color.redLightActive

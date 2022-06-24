@@ -120,24 +120,12 @@ public extension UIColor {
     // MARK: - Product
     /// Orbit Product Dark color.
     static let productDark = fromResource(named: "Product Dark")
-    /// Orbit Product Dark Active color.
-    static let productDarkActive = fromResource(named: "Product Dark Active")
-    /// Orbit Product Dark Hover color.
-    static let productDarkHover = fromResource(named: "Product Dark Hover")
     /// Orbit Product Darker color.
     static let productDarker = fromResource(named: "Product Darker")
     /// Orbit Product Light color.
     static let productLight = fromResource(named: "Product Light")
-    /// Orbit Product Light Active color.
-    static let productLightActive = fromResource(named: "Product Light Active")
-    /// Orbit Product Light Hover color.
-    static let productLightHover = fromResource(named: "Product Light Hover")
     /// Orbit Product Normal color.
     static let productNormal = fromResource(named: "Product Normal")
-    /// Orbit Product Normal Active color.
-    static let productNormalActive = fromResource(named: "Product Normal Active")
-    /// Orbit Product Normal Hover color.
-    static let productNormalHover = fromResource(named: "Product Normal Hover")
 
     // MARK: - Red
     /// Orbit Red Dark color.
@@ -176,4 +164,12 @@ public extension UIColor {
     static let whiteActive = fromResource(named: "White Active")
     /// Orbit White Hover color.
     static let whiteHover = fromResource(named: "White Hover")
+    
+    // MARK: - Icon
+    /// Zuper Icon Primary color.
+    static let iconPrimary = fromResource(named:"Icon Primary")
+    /// Zuper Icon Primary color.
+    static let iconSecondary = fromResource(named:"Icon Secondary")
+    /// Zuper Icon Primary color.
+    static let iconTertiary = fromResource(named:"Icon Tertiary")
 }

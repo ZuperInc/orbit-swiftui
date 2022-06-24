@@ -4,6 +4,7 @@ struct StorybookColors {
 
     @ViewBuilder static var storybook: some View {
         product
+        Icon
         white
         cloud
         ink
@@ -25,18 +26,12 @@ struct StorybookColors {
             VStack(spacing: 0) {
                 HStack(spacing: 0) {
                     color(.productLight, label: "Product Light")
-                    color(.productLightHover, label: "Product Light: hover")
-                    color(.productLightActive, label: "Product Light: active")
                 }
                 HStack(spacing: 0) {
                     color(.productNormal, label: "Product Normal")
-                    color(.productNormalHover, label: "Product Normal: hover")
-                    color(.productNormalActive, label: "Product Normal: active")
                 }
                 HStack(spacing: 0) {
                     color(.productDark, label: "Product Dark")
-                    color(.productDarkHover, label: "Product Dark: hover")
-                    color(.productDarkActive, label: "Product Dark: active")
                 }
                 color(.productDarker, label: "Product Darker")
             }
@@ -44,6 +39,23 @@ struct StorybookColors {
         .padding(.medium)
     }
 
+    @ViewBuilder static var Icon: some View {
+        Card("Icon", borderStyle: .default, contentLayout: .fill) {
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    color(.iconPrimary, label: "Icon Primary")
+                }
+                HStack(spacing: 0) {
+                    color(.iconSecondary, label: "Icon Secondary")
+                }
+                HStack(spacing: 0) {
+                    color(.iconTertiary, label: "Icon Tertiary")
+                }
+            }
+        }
+        .padding(.medium)
+    }
+    
     @ViewBuilder static var white: some View {
         Card("White", borderStyle: .default, contentLayout: .fill) {
             VStack(spacing: 0) {

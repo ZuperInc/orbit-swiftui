@@ -12,7 +12,7 @@ public struct Progress: View {
             .overlay(
                 GeometryReader { geometry in
                     Capsule()
-                        .foregroundColor(Color.productNormalActive)
+                        .foregroundColor(Color.productNormal)
                         .padding(.trailing, geometry.size.width * (1 - max(min(1, progress), 0)))
                         .animation(.easeOut, value: progress)
                 },
