@@ -181,11 +181,11 @@ public extension Text {
 
         public var value: CGFloat {
             switch self {
-                case .small:                return 12
-                case .normal:               return 14
-                case .large:                return 16
-                case .xLarge:               return 18
-                case .custom(let size):     return size
+            case .small:                return  UIDevice.current.userInterfaceIdiom == .phone ? 12 : 14
+            case .normal:               return  UIDevice.current.userInterfaceIdiom == .phone ? 14 : 16
+            case .large:                return  UIDevice.current.userInterfaceIdiom == .phone ? 16 : 18
+            case .xLarge:               return  UIDevice.current.userInterfaceIdiom == .phone ? 18 : 20
+            case .custom(let size):     return size
             }
         }
 
