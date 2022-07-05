@@ -12,7 +12,7 @@ public struct ButtonLink: View {
     let action: () -> Void
 
     public var body: some View {
-        if label.isEmpty == false {
+     //   if label.isEmpty == false {
             SwiftUI.Button(
                 action: {
                     HapticsProvider.sendHapticFeedback(.light(0.5))
@@ -40,7 +40,7 @@ public struct ButtonLink: View {
                 }
             )
             .buttonStyle(OrbitStyle(style: style, size: size))
-        }
+    //    }
     }
     
     var iconSize: Icon.Size {
