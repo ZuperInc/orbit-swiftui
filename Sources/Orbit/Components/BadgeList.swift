@@ -18,14 +18,14 @@ public struct BadgeList: View {
     public var body: some View {
         if isEmpty == false {
             HStack(alignment: .firstTextBaseline, spacing: Self.spacing) {
-                Icon(content: iconContent, size: .small)
+                Icon(content: iconContent, size: .normal)
                     .foregroundColor(style.iconColor)
                     .padding(.xxSmall)
                     .background(badgeBackground)
 
                 Text(
                     label,
-                    size: .small,
+                    size: .normal,
                     color: .custom(labelColor.color),
                     linkColor: .custom(labelColor.color),
                     linkAction: linkAction
