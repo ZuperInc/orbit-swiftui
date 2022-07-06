@@ -9,21 +9,22 @@ import SwiftUI
 public struct Badge: View {
 
     public static let verticalPadding: CGFloat = 4 + 1/3 // Makes height exactly 24 at normal text size
-    public static let textSize: Text.Size = .small
 
     let label: String
     let iconContent: Icon.Content
     var style: Style
+    var textSize:Text.Size
+    var iconSize:Icon.Size
 
     public var body: some View {
         if isEmpty == false {
             HStack(spacing: 0) {
                 HStack(spacing: .xxSmall) {
-                    Icon(content: iconContent, size: .small)
+                    Icon(content: iconContent, size: iconSize)
 
                     Text(
                         label,
-                        size: Self.textSize,
+                        size: textSize,
                         color: .none,
                         weight: .medium,
                         linkColor: .custom(style.labelColor)
@@ -32,7 +33,7 @@ public struct Badge: View {
                 }
                 .foregroundColor(Color(style.labelColor))
 
-                TextStrut(Self.textSize)
+                TextStrut(textSize)
                     .padding(.vertical, Self.verticalPadding)
             }
             .padding(.horizontal, .xSmall)
@@ -62,10 +63,12 @@ public struct Badge: View {
 public extension Badge {
     
     /// Creates Orbit Badge component.
-    init(_ label: String = "", icon: Icon.Content = .none, style: Style = .neutral) {
+    init(_ label: String = "", icon: Icon.Content = .none, style: Style = .neutral,textSize:Text.Size = .small,iconSize:Icon.Size = .small) {
         self.label = label
         self.iconContent = icon
         self.style = style
+        self.textSize = textSize
+        self.iconSize = iconSize
     }
 }
 
@@ -153,6 +156,7 @@ struct BadgePreviews: PreviewProvider {
 
     static var standalone: some View {
         VStack(spacing: 0) {
+            Badge("Zuper", icon: .email, style: .light, textSize: .large, iconSize: .large)
             Badge("label", icon: .grid)
             Badge()    // EmptyView
             Badge("")  // EmptyView

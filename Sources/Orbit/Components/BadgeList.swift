@@ -14,18 +14,21 @@ public struct BadgeList: View {
     let style: Style
     let labelColor: LabelColor
     let linkAction: TextLink.Action
+    let textSize:Text.Size
+    let iconSize:Icon.Size
+    
 
     public var body: some View {
         if isEmpty == false {
             HStack(alignment: .firstTextBaseline, spacing: Self.spacing) {
-                Icon(content: iconContent, size: .normal)
+                Icon(content: iconContent, size: iconSize)
                     .foregroundColor(style.iconColor)
                     .padding(.xxSmall)
                     .background(badgeBackground)
 
                 Text(
                     label,
-                    size: .normal,
+                    size: textSize,
                     color: .custom(labelColor.color),
                     linkColor: .custom(labelColor.color),
                     linkAction: linkAction
@@ -53,6 +56,7 @@ public extension BadgeList {
         icon: Icon.Content = .none,
         style: Style = .neutral,
         labelColor: LabelColor = .default,
+        fontSize:Text.Size = .small,iconSize:Icon.Size = .small,
         linkAction: @escaping TextLink.Action = { _, _ in }
     ) {
         self.label = label
@@ -60,6 +64,8 @@ public extension BadgeList {
         self.style = style
         self.labelColor = labelColor
         self.linkAction = linkAction
+        self.textSize = fontSize
+        self.iconSize = iconSize
     }
 }
 
@@ -145,6 +151,7 @@ struct BadgeListPreviews: PreviewProvider {
             BadgeList("This is simple Info BadgeList item with SF Symbol", icon: .sfSymbol("info.circle.fill"), style: .status(.info))
             BadgeList("This is simple Info BadgeList item with CountryFlag", icon: .countryFlag("cz"), style: .status(.critical))
             BadgeList("This is simple Info BadgeList item with custom image", icon: .image(.orbit(.facebook)), style: .status(.success))
+            BadgeList("Zuper", icon: .phone, fontSize: .large, iconSize: .large)
         }
         .padding(.medium)
     }
