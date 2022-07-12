@@ -14,10 +14,11 @@ public struct Dialog: View {
     let buttonConfiguration: Buttons
     let imgName: String
     let bundle: Bundle
+    let layout: Illustration.Layout
 
     public var body: some View {
         VStack(alignment: .center, spacing: .medium) {
-            Illustration(imgName, bundle: bundle, layout: .frame(maxHeight: 120))
+            Illustration(imgName, bundle: bundle, layout: layout)
                 .padding(.top, .medium)
 
             VStack(alignment: .center, spacing: .xSmall) {
@@ -86,7 +87,8 @@ extension Dialog {
         title: String = "",
         description: String = "",
         style: Style = .primary,
-        buttons: Buttons
+        buttons: Buttons,
+        layout:Illustration.Layout = .frame(maxHeight: 120)
     ) {
         self.imgName = imgName
         self.bundle = bundle
@@ -94,6 +96,7 @@ extension Dialog {
         self.description = description
         self.style = style
         self.buttonConfiguration = buttons
+        self.layout = layout
     }
 }
 
@@ -163,7 +166,7 @@ struct DialogPreviews: PreviewProvider {
             bundle: .current,
             title: title1,
             description: description1,
-            buttons: .primarySecondaryAndTertiary("Main CTA", "Secondary", "Tertiary")
+            buttons: .primarySecondaryAndTertiary("Main CTA", "Secondary", "Tertiary"),layout: .frame(maxHeight:120)
         )
         .background(Color.whiteNormal)
     }
