@@ -7,15 +7,17 @@ public struct Dialog: View {
 
     public static let shadowColor = Color.inkNormal
 
-    let illustration: Illustration.Image
+   // let illustration: Illustration.Image
     let title: String
     let description: String
     let style: Style
     let buttonConfiguration: Buttons
+    let imgName: String
+    let bundle: Bundle
 
     public var body: some View {
         VStack(alignment: .center, spacing: .medium) {
-            Illustration(illustration, layout: .frame(maxHeight: 120))
+            Illustration(imgName, bundle: bundle, layout: .frame(maxHeight: 120))
                 .padding(.top, .medium)
 
             VStack(alignment: .center, spacing: .xSmall) {
@@ -79,13 +81,15 @@ extension Dialog {
 
     /// Creates Orbit Dialog component.
     public init(
-        illustration: Illustration.Image = .none,
+        imgName: String = Illustration.Image.none.assetName,
+        bundle:Bundle = .current,
         title: String = "",
         description: String = "",
         style: Style = .primary,
         buttons: Buttons
     ) {
-        self.illustration = illustration
+        self.imgName = imgName
+        self.bundle = bundle
         self.title = title
         self.description = description
         self.style = style
@@ -155,7 +159,8 @@ struct DialogPreviews: PreviewProvider {
 
     static var normal: some View {
         Dialog(
-            illustration: .noNotification,
+            imgName: Illustration.Image.noNotification.assetName,
+            bundle: .current,
             title: title1,
             description: description1,
             buttons: .primarySecondaryAndTertiary("Main CTA", "Secondary", "Tertiary")
@@ -165,7 +170,7 @@ struct DialogPreviews: PreviewProvider {
 
     static var critical: some View {
         Dialog(
-            illustration: .noNotification,
+            imgName: Illustration.Image.noNotification.assetName, bundle: .current,
             title: title2,
             description: description2,
             style: .critical,
