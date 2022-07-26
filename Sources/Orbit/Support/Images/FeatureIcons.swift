@@ -24,3 +24,4 @@ public extension UIImage {
         image(featureIcon)
     }
 }
+

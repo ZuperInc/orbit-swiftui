@@ -7,12 +7,14 @@ public struct EmptyState: View {
 
     let title: String
     let description: String
-    let illustration: Illustration.Image
     let action: Action
+    let imgName: String
+    let bundle: Bundle
+    let layout: Illustration.Layout
 
     public var body: some View {
         VStack(spacing: .medium) {
-            Illustration(illustration, layout: .frame(maxHeight: 120))
+            Illustration(imgName, bundle: bundle, layout: layout)
                 .padding(.top, .large)
         
             texts
@@ -61,12 +63,16 @@ public extension EmptyState {
     init(
         _ title: String = "",
         description: String = "",
-        illustration: Illustration.Image,
-        action: Action = .none
+        action: Action = .none,
+        imgName: String = Illustration.Image.none.assetName,
+        bundle:Bundle = .current,
+        layout: Illustration.Layout = .frame(maxHeight: 120)
     ) {
         self.title = title
         self.description = description
-        self.illustration = illustration
+        self.imgName = imgName
+        self.bundle = bundle
+        self.layout = layout
         self.action = action
     }
 }
@@ -98,17 +104,17 @@ struct EmptyStatePreviews: PreviewProvider {
     }
 
     static var standalone: some View {
-        EmptyState(title, description: description, illustration: .noResults, action: .button(button))
+        EmptyState(title, description: description, action: .button(button),imgName: Illustration.Image.accommodation.assetName)
             .padding(.medium)
     }
     
     static var subtle: some View {
-        EmptyState(title, description: description, illustration: .error404, action: .button(button, style: .primarySubtle))
+        EmptyState(title, description: description, action: .button(button, style: .primarySubtle),imgName: Illustration.Image.accommodation.assetName)
             .padding(.medium)
     }
     
     static var noAction: some View {
-        EmptyState(title, description: description, illustration: .offline)
+        EmptyState(title, description: description)
             .padding(.medium)
     }
 
