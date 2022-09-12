@@ -15,7 +15,6 @@ public struct BadgeList: View {
     let labelColor: LabelColor
     let size: Size
     let linkAction: TextLink.Action
-    let textSize:Text.Size
     let iconSize:Icon.Size
     
 
@@ -74,6 +73,7 @@ public extension BadgeList {
         style: Style = .neutral,
         labelColor: LabelColor = .primary,
         size: Size = .normal,
+        iconSize:Icon.Size = .small,
         linkAction: @escaping TextLink.Action = { _, _ in }
     ) {
         self.label = label
@@ -82,7 +82,6 @@ public extension BadgeList {
         self.labelColor = labelColor
         self.size = size
         self.linkAction = linkAction
-        self.textSize = fontSize
         self.iconSize = iconSize
     }
 }

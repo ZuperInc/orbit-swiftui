@@ -18,7 +18,7 @@ public struct Dialog: View {
     let layout: Illustration.Layout
 
     public var body: some View {
-        VStack(alignment: .center, spacing: .medium) {
+        VStack(alignment: alignment, spacing: .medium) {
             Illustration(imgName, bundle: bundle, layout: layout)
                 .padding(.top, .medium)
 
@@ -89,6 +89,7 @@ extension Dialog {
         bundle:Bundle = .current,
         title: String = "",
         description: String = "",
+        alignment:HorizontalAlignment = .center,
         style: Style = .primary,
         buttons: Buttons,
         layout:Illustration.Layout = .frame(maxHeight: 120)
@@ -98,9 +99,9 @@ extension Dialog {
         self.title = title
         self.description = description
         self.style = style
-        self.alignment = alignment
         self.buttonConfiguration = buttons
         self.layout = layout
+        self.alignment = alignment
     }
 }
 
@@ -177,10 +178,9 @@ struct DialogPreviews: PreviewProvider {
 
     static var centered: some View {
         Dialog(
-            illustration: .noNotification,
+            imgName: Illustration.Image.noNotification.assetName,
             title: title1,
             description: description1,
-            alignment: .center,
             buttons: .primarySecondaryAndTertiary("Main CTA", "Secondary", "Tertiary")
         )
         .background(Color.whiteNormal)

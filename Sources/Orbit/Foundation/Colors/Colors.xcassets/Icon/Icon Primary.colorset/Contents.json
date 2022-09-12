@@ -23,15 +23,9 @@
         "color-space" : "srgb",
         "components" : {
           "alpha" : "1.000",
-<<<<<<< HEAD:Sources/Orbit/Foundation/Colors/Colors.xcassets/Icon/Icon Primary.colorset/Contents.json
           "blue" : "1.000",
           "green" : "1.000",
           "red" : "1.000"
-=======
-          "blue" : "0xDB",
-          "green" : "0xFF",
-          "red" : "0x09"
->>>>>>> main:Sources/Orbit/Foundation/Colors/Colors.xcassets/Product/Product Dark Hover.colorset/Contents.json
         }
       },
       "idiom" : "universal"

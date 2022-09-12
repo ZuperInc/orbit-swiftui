@@ -50,16 +50,16 @@ struct StorybookColors {
     }
 
     @ViewBuilder static var Icon: some View {
-        Card("Icon", borderStyle: .default, contentLayout: .fill) {
+        card("Icon") {
             VStack(spacing: 0) {
                 HStack(spacing: 0) {
-                    color(.iconPrimary, label: "Icon Primary")
+                    color(&.iconPrimary, uiColor: &.iconPrimary, label: "Icon Primary")
                 }
                 HStack(spacing: 0) {
-                    color(.iconSecondary, label: "Icon Secondary")
+                    color(&.iconSecondary, uiColor: &.iconPrimary, label: "Icon Secondary")
                 }
                 HStack(spacing: 0) {
-                    color(.iconTertiary, label: "Icon Tertiary")
+                    color(&.iconTertiary, uiColor: &.iconPrimary, label: "Icon Tertiary")
                 }
             }
         }

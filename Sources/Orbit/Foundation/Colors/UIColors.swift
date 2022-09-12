@@ -177,16 +177,15 @@ public extension UIColor {
     /// Orbit White Darker color.
     static var whiteDarker = fromResource(named: "White Darker")
     /// Orbit White Hover color.
-    static let whiteHover = fromResource(named: "White Hover")
-    
-    // MARK: - Icon
-    /// Zuper Icon Primary color.
-    static let iconPrimary = fromResource(named:"Icon Primary")
-    /// Zuper Icon Primary color.
-    static let iconSecondary = fromResource(named:"Icon Secondary")
-    /// Zuper Icon Primary color.
-    static let iconTertiary = fromResource(named:"Icon Tertiary")
     static var whiteHover = fromResource(named: "White Hover")
     /// Orbit White Lighter color.
     static var whiteLighter = fromResource(named: "White Lighter")
+    
+    // MARK: - Icon
+    /// Zuper Icon Primary color.
+    static var iconPrimary = fromResource(named:"Icon Primary")
+    /// Zuper Icon Primary color.
+    static var iconSecondary = fromResource(named:"Icon Secondary")
+    /// Zuper Icon Primary color.
+    static var iconTertiary = fromResource(named:"Icon Tertiary")
 }

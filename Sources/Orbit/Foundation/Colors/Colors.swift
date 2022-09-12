@@ -177,16 +177,15 @@ public extension Color {
     /// Orbit White Darker color.
     static var whiteDarker = Color("White Darker", bundle: .current)
     /// Orbit White Hover color.
-    static let whiteHover = Color("White Hover", bundle: .current)
-    
-    // MARK: - Icon
-    /// Zuper Icon Primary color.
-    static let iconPrimary = Color("Icon Primary", bundle: .current)
-    /// Zuper Icon Primary color.
-    static let iconSecondary = Color("Icon Secondary", bundle: .current)
-    /// Zuper Icon Primary color.
-    static let iconTertiary = Color("Icon Tertiary", bundle: .current)
     static var whiteHover = Color("White Hover", bundle: .current)
     /// Orbit White Lighter color.
     static var whiteLighter = Color("White Lighter", bundle: .current)
+    
+    // MARK: - Icon
+    /// Zuper Icon Primary color.
+    static var iconPrimary = Color("Icon Primary", bundle: .current)
+    /// Zuper Icon Primary color.
+    static var iconSecondary = Color("Icon Secondary", bundle: .current)
+    /// Zuper Icon Primary color.
+    static var iconTertiary = Color("Icon Tertiary", bundle: .current)
 }
