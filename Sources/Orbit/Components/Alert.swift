@@ -25,8 +25,10 @@ public enum AlertButtons {
 /// Use at most two actions in each Alert: one primary and one subtle.
 ///
 /// - Note: [Orbit definition](https://orbit.kiwi/components/alert/)
-/// - Important: Component expands horizontally to infinity.
+/// - Important: Component expands horizontally unless prevented by `fixedSize` or `idealSize` modifier.
 public struct Alert<Content: View>: View {
+
+    @Environment(\.idealSize) var idealSize
 
     let title: String
     let description: String
@@ -39,13 +41,11 @@ public struct Alert<Content: View>: View {
 
     public var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: .xSmall) {
-            
             Icon(content: iconContent, size: .normal)
                 .foregroundColor(status.color)
                 .accessibility(.alertIcon)
             
             VStack(alignment: .leading, spacing: .medium) {
-
                 if isHeaderEmpty == false {
                     VStack(alignment: .leading, spacing: .xxSmall) {
                         Text(title, weight: .bold)
@@ -66,7 +66,7 @@ public struct Alert<Content: View>: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: idealSize.horizontal ? nil : .infinity, alignment: .leading)
         .padding([.vertical, .trailing], .medium)
         .padding(.leading, iconContent.isEmpty ? .medium : .small)
         .background(background)
@@ -227,6 +227,7 @@ struct AlertPreviews: PreviewProvider {
             primaryButtonOnly
             noButtons
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -237,29 +238,24 @@ struct AlertPreviews: PreviewProvider {
             icon: .grid,
             buttons: primaryAndSecondaryConfiguration
         ) {
-            customContentPlaceholder
+            contentPlaceholder
         }
-        .padding(.medium)
     }
 
     static var basic: some View {
         alerts(showIcons: true, isSuppressed: false)
-            .padding(.medium)
     }
 
     static var basicNoIcon: some View {
         alerts(showIcons: false, isSuppressed: false)
-            .padding(.medium)
     }
 
     static var suppressed: some View {
         alerts(showIcons: true, isSuppressed: true)
-            .padding(.medium)
     }
 
     static var suppressedNoIcon: some View {
         alerts(showIcons: false, isSuppressed: true)
-            .padding(.medium)
     }
 
     static func alert(_ title: String, status: Status, icon: Icon.Symbol, isSuppressed: Bool) -> some View {
@@ -292,8 +288,9 @@ struct AlertPreviews: PreviewProvider {
             Alert(title, buttons: Self.primaryConfiguration)
             Alert(icon: .informationCircle, buttons: Self.primaryConfiguration)
             Alert(buttons: Self.primaryConfiguration)
+            Alert("Intrinsic width", buttons: Self.primaryConfiguration)
+                .idealSize(horizontal: true, vertical: false)
         }
-        .padding(.medium)
         .previewDisplayName("Primary buttons")
     }
     
@@ -302,17 +299,18 @@ struct AlertPreviews: PreviewProvider {
             Alert(title, description: description, icon: .informationCircle)
             Alert(title, description: description)
             Alert(title) {
-                customContentPlaceholder
+                contentPlaceholder
             }
             Alert {
-                customContentPlaceholder
+                contentPlaceholder
             }
             Alert(title, icon: .informationCircle)
             Alert(icon: .informationCircle)
             Alert(title)
             Alert()
+            Alert("Intrinsic width")
+                .idealSize(horizontal: true, vertical: false)
         }
-        .padding(.medium)
         .previewDisplayName("No buttons")
     }
 
@@ -353,13 +351,13 @@ struct AlertPreviews: PreviewProvider {
                     }
                 }
             }
-            .padding(.medium)
             .animation(.default, value: buttons.wrappedValue.isVisible)
         }
     }
 
     static var snapshot: some View {
         standalone
+            .padding(.medium)
     }
 }
 
@@ -375,6 +373,7 @@ struct AlertDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 

@@ -2,6 +2,15 @@ import SwiftUI
 
 public struct Storybook: View {
 
+    static var userInterfaceStyleOverride : UIUserInterfaceStyle  {
+        get {
+            UIApplication.shared.firstKeyWindow?.overrideUserInterfaceStyle ?? .unspecified
+        }
+        set {
+            UIApplication.shared.firstKeyWindow?.overrideUserInterfaceStyle = newValue
+        }
+    }
+
     static var foundationItems: [Item] {
         Self.Item.allCases.filter { $0.section == .foundation }
     }
@@ -10,8 +19,9 @@ public struct Storybook: View {
         Self.Item.allCases.filter { $0.section == .components }
     }
 
+    @Environment(\.colorScheme) var colorScheme
     @State var selectedItem: Item? = nil
-    @State var darkMode: Bool = false
+    @State var isColorSchemeInverted: Bool = Self.userInterfaceStyleOverride != .unspecified
 
     public var body: some View {
         NavigationView {
@@ -34,22 +44,26 @@ public struct Storybook: View {
                     )
                 ) {
                     AnyView(
-                        StorybookDetail(menuItem: selectedItem ?? .colors, darkMode: $darkMode)
+                        StorybookDetail(
+                            menuItem: selectedItem ?? .colors,
+                            isColorSchemeInverted: $isColorSchemeInverted.onUpdate(invertColorScheme)
+                        )
                     )
                 }
                 .hidden()
             )
+            .background(Color.whiteNormal.edgesIgnoringSafeArea(.all))
             .navigationBarItems(trailing: darkModeSwitch)
             .navigationBarTitle("Orbit Storybook", displayMode: .large)
         }
         .navigationViewStyle(.stack)
         .accentColor(.inkNormal)
-        .environment(\.colorScheme, darkMode ? .dark : .light)
     }
 
     @ViewBuilder var darkModeSwitch: some View {
         BarButton(.sun) {
-            darkMode.toggle()
+            isColorSchemeInverted.toggle()
+            invertColorScheme()
         }
     }
 
@@ -68,8 +82,6 @@ public struct Storybook: View {
                 .padding(.vertical, .small)
                 .padding(.horizontal, .medium)
             tileStack(items: Self.componentItems)
-                .compositingGroup()
-                .drawingGroup(opaque: false, colorMode: .extendedLinear)
         }
     }
 
@@ -82,24 +94,34 @@ public struct Storybook: View {
                 tile(items[rowIndex * 2 + 1])
             }
             .padding(.horizontal, .medium)
-            .padding(.top, .xSmall)
-            .padding(.bottom, .medium)
+            .padding(.top, .xxSmall)
+            .padding(.bottom, .small)
         }
     }
 
     @ViewBuilder func tile(_ item: Item) -> some View {
-        Tile(
-            String(describing: item).titleCased,
-            icon: item.tabs.isEmpty ? .timelapse : .sfSymbol(item.sfSymbol),
-            disclosure: .none,
-            border: item.tabs.isEmpty ? .none : .default,
-            titleStyle: .title5
-        ) {
+        Tile(disclosure: .none, showBorder: item.tabs.isEmpty == false) {
             selectedItem = item
+        } content: {
+            Label(
+                String(describing: item).titleCased,
+                icon: item.tabs.isEmpty ? .timelapse : .sfSymbol(item.sfSymbol),
+                style: .title5
+            )
+            .padding(.small)
         }
+        .environment(\.isElevationEnabled, item.tabs.isEmpty == false)
         .opacity(item.tabs.isEmpty ? 0.4 : 1)
         .disabled(item.tabs.isEmpty)
         .frame(maxWidth: .infinity)
+    }
+
+    func invertColorScheme() {
+        if isColorSchemeInverted {
+            Self.userInterfaceStyleOverride = (colorScheme == .dark ? .light : .dark)
+        } else {
+            Self.userInterfaceStyleOverride = .unspecified
+        }
     }
 }
 
@@ -107,6 +129,31 @@ extension String {
 
     var titleCased: String {
         (first?.uppercased() ?? "") + dropFirst()
+    }
+}
+
+extension UIApplication {
+
+    var firstKeyWindow: UIWindow? {
+        windows.first { $0.isKeyWindow }
+    }
+}
+
+extension Binding {
+
+    /// When the `Binding`'s `wrappedValue` changes, the given closure is executed.
+    /// - Parameter closure: Chunk of code to execute whenever the value changes.
+    /// - Returns: New `Binding`.
+    func onUpdate(_ closure: @escaping () -> Void) -> Binding<Value> {
+        .init(
+            get: {
+                wrappedValue
+            },
+            set: { newValue in
+                wrappedValue = newValue
+                closure()
+            }
+        )
     }
 }
 

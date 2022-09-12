@@ -13,6 +13,7 @@ public struct BadgeList: View {
     let iconContent: Icon.Content
     let style: Style
     let labelColor: LabelColor
+    let size: Size
     let linkAction: TextLink.Action
     let textSize:Text.Size
     let iconSize:Icon.Size
@@ -21,15 +22,16 @@ public struct BadgeList: View {
     public var body: some View {
         if isEmpty == false {
             HStack(alignment: .firstTextBaseline, spacing: Self.spacing) {
-                Icon(content: iconContent, size: iconSize)
-                    .foregroundColor(style.iconColor)
+                badgeOrEmptySpace
+                    .foregroundColor(.init(style.iconColor))
                     .padding(.xxSmall)
                     .background(badgeBackground)
 
                 Text(
                     label,
-                    size: textSize,
+                    size: size.textSize,
                     color: .custom(labelColor.color),
+                    accentColor: style.iconColor,
                     linkColor: .custom(labelColor.color),
                     linkAction: linkAction
                 )
@@ -37,13 +39,28 @@ public struct BadgeList: View {
         }
     }
 
+    @ViewBuilder var badgeOrEmptySpace: some View {
+        if iconContent.isEmpty {
+            Icon(content: .grid, size: .small)
+                .opacity(0)
+        } else {
+            Icon(content: iconContent, size: .small)
+        }
+    }
+
     @ViewBuilder var badgeBackground: some View {
-        style.backgroundColor
-            .clipShape(Circle())
+        if iconContent.isEmpty == false {
+            style.backgroundColor
+                .clipShape(Circle())
+        }
     }
 
     var isEmpty: Bool {
         label.isEmpty && iconContent.isEmpty
+    }
+
+    var textLeadingPadding: CGFloat {
+        iconContent.isEmpty ? (Icon.Size.small.value + Self.spacing) : 0
     }
 }
 
@@ -55,14 +72,15 @@ public extension BadgeList {
         _ label: String = "",
         icon: Icon.Content = .none,
         style: Style = .neutral,
-        labelColor: LabelColor = .default,
-        fontSize:Text.Size = .small,iconSize:Icon.Size = .small,
+        labelColor: LabelColor = .primary,
+        size: Size = .normal,
         linkAction: @escaping TextLink.Action = { _, _ in }
     ) {
         self.label = label
         self.iconContent = icon
         self.style = style
         self.labelColor = labelColor
+        self.size = size
         self.linkAction = linkAction
         self.textSize = fontSize
         self.iconSize = iconSize
@@ -76,7 +94,7 @@ public extension BadgeList {
 
         case neutral
         case status(_ status: Status)
-        case custom(iconColor: SwiftUI.Color, backgroundColor: SwiftUI.Color)
+        case custom(iconColor: UIColor, backgroundColor: SwiftUI.Color)
 
         public var backgroundColor: Color {
             switch self {
@@ -89,7 +107,7 @@ public extension BadgeList {
             }
         }
 
-        public var iconColor: Color {
+        public var iconColor: UIColor {
             switch self {
                 case .neutral:                              return .inkLight
                 case .status(.info):                        return .blueNormal
@@ -102,13 +120,29 @@ public extension BadgeList {
     }
 
     enum LabelColor {
-        case `default`
+        case primary
+        case secondary
         case custom(_ color: UIColor)
 
         var color: UIColor {
             switch self {
-                case .default:              return .inkLight
+                case .primary:              return .inkNormal
+                case .secondary:            return .inkLight
                 case .custom(let color):    return color
+            }
+        }
+    }
+
+    enum Size {
+        case small
+        case normal
+        case custom(_ size: Text.Size)
+
+        var textSize: Text.Size {
+            switch self {
+                case .small:              	return .small
+                case .normal:               return .normal
+                case .custom(let size):     return size
             }
         }
     }
@@ -117,12 +151,17 @@ public extension BadgeList {
 // MARK: - Previews
 struct BadgeListPreviews: PreviewProvider {
 
+    static let label = "This is simple BadgeList item"
+    static let longLabel = "This is simple Neutral BadgeList item with <u>very long</u> and <strong>formatted</strong> multiline content with a <a href=\".\">TextLink</a>"
+
     static var previews: some View {
         PreviewWrapper {
             standalone
+            standaloneSmallSecondary
             storybook
             storybookMix
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -132,32 +171,43 @@ struct BadgeListPreviews: PreviewProvider {
             BadgeList()   // EmptyView
             BadgeList("") // EmptyView
         }
-        .padding(.medium)
+    }
+
+    static var standaloneSmallSecondary: some View {
+        BadgeList("Neutral BadgeList", icon: .grid, labelColor: .secondary, size: .small)
     }
 
     static var storybook: some View {
-        VStack(alignment: .leading, spacing: .medium) {
-            BadgeList("This is simple Neutral BadgeList item with <u>very long</u> and <strong>formatted</strong> multiline content with a <a href=\".\">TextLink</a>", icon: .grid)
-            BadgeList("This is simple Info BadgeList item", icon: .informationCircle, style: .status(.info))
-            BadgeList("This is simple Success BadgeList item", icon: .checkCircle, style: .status(.success))
-            BadgeList("This is simple Warning BadgeList item", icon: .alertCircle, style: .status(.warning))
-            BadgeList("This is simple Critical BadgeList item", icon: .alertCircle, style: .status(.critical))
+        VStack(alignment: .leading, spacing: .xxLarge) {
+            VStack(alignment: .leading, spacing: .medium) {
+                BadgeList(longLabel, icon: .grid)
+                BadgeList(label, icon: .informationCircle, style: .status(.info))
+                BadgeList(label, icon: .checkCircle, style: .status(.success))
+                BadgeList(label, icon: .alertCircle, style: .status(.warning))
+                BadgeList(label, icon: .alertCircle, style: .status(.critical))
+            }
+            VStack(alignment: .leading, spacing: .medium) {
+                BadgeList(longLabel, icon: .grid, labelColor: .secondary, size: .small)
+                BadgeList(label, icon: .informationCircle, style: .status(.info), labelColor: .secondary, size: .small)
+                BadgeList(label, icon: .checkCircle, style: .status(.success), labelColor: .secondary, size: .small)
+                BadgeList(label, icon: .alertCircle, style: .status(.warning), labelColor: .secondary, size: .small)
+                BadgeList(label, icon: .alertCircle, style: .status(.critical), labelColor: .secondary, size: .small)
+            }
         }
-        .padding(.medium)
     }
 
     static var storybookMix: some View {
         VStack(alignment: .leading, spacing: .medium) {
-            BadgeList("This is simple Info BadgeList item with SF Symbol", icon: .sfSymbol("info.circle.fill"), style: .status(.info))
-            BadgeList("This is simple Info BadgeList item with CountryFlag", icon: .countryFlag("cz"), style: .status(.critical))
-            BadgeList("This is simple Info BadgeList item with custom image", icon: .image(.orbit(.facebook)), style: .status(.success))
-            BadgeList("Zuper", icon: .phone, fontSize: .large, iconSize: .large)
+            BadgeList("This is simple <ref>BadgeList</ref> item with <strong>SF Symbol</strong>", icon: .sfSymbol("info.circle.fill"), style: .status(.info))
+            BadgeList("This is simple <ref>BadgeList</ref> item with <strong>CountryFlag</strong>", icon: .countryFlag("cz"), style: .status(.critical))
+            BadgeList("This is simple <ref>BadgeList</ref> item with custom image", icon: .image(.orbit(.facebook)), style: .status(.success))
+            BadgeList("This is <ref>BadgeList</ref> item with no icon and custom color", labelColor: .custom(.blueDark))
         }
-        .padding(.medium)
     }
 
     static var snapshot: some View {
         storybook
+            .padding(.medium)
     }
 }
 
@@ -173,6 +223,7 @@ struct BadgeListDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 

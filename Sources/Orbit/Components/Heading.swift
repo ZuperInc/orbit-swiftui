@@ -6,23 +6,34 @@ import SwiftUI
 /// - Important: Component has fixed vertical size.
 public struct Heading: View {
 
+    @Environment(\.sizeCategory) var sizeCategory
+
     let label: String
     let style: Style
     let color: Color?
     let alignment: TextAlignment
 
     public var body: some View {
-        if text.isEmpty == false {
-            SwiftUI.Text(verbatim: text)
-                .font(.orbit(size: style.size, weight: style.weight, style: style.textStyle))
-                .foregroundColor(color?.value)
+        if updatedLabel.isEmpty == false {
+            text(sizeCategory: sizeCategory)
                 .multilineTextAlignment(alignment)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibility(addTraits: .isHeader)
         }
     }
 
-    var text: String {
+    func text(sizeCategory: ContentSizeCategory) -> SwiftUI.Text {
+        SwiftUI.Text(verbatim: updatedLabel)
+            .orbitFont(
+                size: style.size,
+                weight: style.weight,
+                style: style.textStyle,
+                sizeCategory: sizeCategory
+            )
+            .foregroundColor(color?.value)
+    }
+
+    var updatedLabel: String {
         switch style {
             case .display, .title1, .displaySubtitle, .title2, .title3, .title4, .title5:   return label
             case .title6:                                                                   return label.localizedUppercase
@@ -93,7 +104,7 @@ public extension Heading {
             }
         }
 
-        var textStyle: Font.TextStyle {
+        public var textStyle: Font.TextStyle {
             switch self {
                 case .display:
                     return .largeTitle
@@ -125,7 +136,7 @@ public extension Heading {
                     return .headline
             }
         }
-        
+
         public var lineHeight: CGFloat {
             switch self {
                 case .display:          return 48
@@ -138,7 +149,7 @@ public extension Heading {
                 case .title6:           return Text.Size.small.lineHeight
             }
         }
-        
+
         public var iconSize: CGFloat {
             switch self {
                 case .display:          return 52
@@ -161,6 +172,16 @@ public extension Heading {
     }
 }
 
+// MARK: - TextRepresentable
+extension Heading: TextRepresentable {
+
+    public func swiftUIText(sizeCategory: ContentSizeCategory) -> SwiftUI.Text? {
+        if updatedLabel.isEmpty { return nil }
+
+        return text(sizeCategory: sizeCategory)
+    }
+}
+
 // MARK: - Previews
 struct HeadingPreviews: PreviewProvider {
 
@@ -170,6 +191,7 @@ struct HeadingPreviews: PreviewProvider {
             sizes
             multiline
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -193,7 +215,6 @@ struct HeadingPreviews: PreviewProvider {
             heading("Title 5", style: .title5)
             heading("Title 6", style: .title6)
         }
-        .padding(.medium)
     }
     
     static var multiline: some View {
@@ -209,12 +230,12 @@ struct HeadingPreviews: PreviewProvider {
             heading("Title 5 with a very very very very very large and multine content", style: .title5)
             heading("Title 6 with a very very very very very large and multine content", style: .title6)
         }
-        .padding(.medium)
         .previewDisplayName("Multiline")
     }
 
     static var snapshot: some View {
         sizes
+            .padding(.medium)
     }
 
     @ViewBuilder static func heading(_ content: String, style: Heading.Style) -> some View {
@@ -237,6 +258,7 @@ struct HeadingDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -244,3 +266,4 @@ struct HeadingDynamicTypePreviews: PreviewProvider {
         HeadingPreviews.sizes
     }
 }
+

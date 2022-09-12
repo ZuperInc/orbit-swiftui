@@ -25,7 +25,7 @@ public struct Text: View {
 
     public var body: some View {
         if content.isEmpty == false {
-            text
+            text(sizeCategory: sizeCategory)
                 .lineSpacing(lineSpacing ?? 0)
                 .multilineTextAlignment(alignment)
                 .fixedSize(horizontal: false, vertical: true)
@@ -61,18 +61,29 @@ public struct Text: View {
         }
     }
 
-    @ViewBuilder var text: some View {
+    func text(sizeCategory: ContentSizeCategory) -> SwiftUI.Text {
         if content.containsHtmlFormatting {
-            SwiftUI.Text(attributedText)
-                .strikethrough(strikethrough, color: foregroundColor.map(SwiftUI.Color.init))
-                .kerning(kerning)
+            return textContent {
+                SwiftUI.Text(attributedText)
+            }
         } else {
-            SwiftUI.Text(verbatim: content)
-                .strikethrough(strikethrough, color: foregroundColor.map(SwiftUI.Color.init))
-                .kerning(kerning)
-                .foregroundColor(foregroundColor.map(SwiftUI.Color.init))
-                .font(.orbit(size: size.value, weight: weight, style: size.textStyle))
+            return textContent {
+                SwiftUI.Text(verbatim: content)
+            }
+            .foregroundColor(foregroundColor.map(SwiftUI.Color.init))
+            .orbitFont(
+                size: size.value,
+                weight: weight,
+                style: size.textStyle,
+                sizeCategory: sizeCategory
+            )
         }
+    }
+
+    func textContent(@ViewBuilder content: () -> SwiftUI.Text) -> SwiftUI.Text {
+        content()
+            .strikethrough(strikethrough, color: foregroundColor.map(SwiftUI.Color.init))
+            .kerning(kerning)
     }
 
     var showTextLinks: Bool {
@@ -106,15 +117,7 @@ public struct Text: View {
     }
 
     var attributedTextScaledSize: CGFloat {
-        size.value * sizeCategory.ratio * attributedTextScaledSizeAdjustment
-    }
-
-    var attributedTextScaledSizeAdjustment: CGFloat {
-        switch sizeCategory.ratio {
-            case ..<1:      return 1.07
-            case 1:         return 1
-            default:        return 0.94
-        }
+        size.value * sizeCategory.ratio
     }
 }
 
@@ -228,11 +231,11 @@ public extension Text {
         case white
         case custom(UIColor)
 
-        var value: SwiftUI.Color {
+        public var value: SwiftUI.Color {
             SwiftUI.Color(uiValue)
         }
         
-        var uiValue: UIColor {
+        public var uiValue: UIColor {
             switch self {
                 case .inkNormal:            return .inkNormal
                 case .inkLight:             return .inkLight
@@ -262,6 +265,16 @@ extension TextAlignment {
     }
 }
 
+// MARK: - TextRepresentable
+extension Text: TextRepresentable {
+
+    public func swiftUIText(sizeCategory: ContentSizeCategory) -> SwiftUI.Text? {
+        if content.isEmpty { return nil }
+
+        return text(sizeCategory: sizeCategory)
+    }
+}
+
 // MARK: - Previews
 struct TextPreviews: PreviewProvider {
 
@@ -278,19 +291,19 @@ struct TextPreviews: PreviewProvider {
             attributedTextSnapshots
             attributedTextInteractive
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
     static var standalone: some View {
         Text("Plain text with no formatting")
-            .padding(.medium)
             .previewDisplayName("Standalone")
     }
 
     @ViewBuilder static var storybook: some View {
         VStack(alignment: .leading, spacing: .medium) {
             Group {
-                standalone
+                Text("Plain text with no formatting")
                 Text("Selectable text (on long tap)", isSelectable: true)
                 Text("Text <u>formatted</u> <strong>and</strong> <ref>accented</ref>", accentColor: .orangeNormal)
                 Text(multilineText)
@@ -301,10 +314,9 @@ struct TextPreviews: PreviewProvider {
                 Text(multilineFormattedText, alignment: .trailing)
                 Text("Text with strikethrough and kerning", strikethrough: true, kerning: 6)
             }
-            .border(Color.cloudDark)
+            .border(Color.cloudDarker, width: .hairline)
         }
         .frame(width: 150)
-        .padding(.medium)
     }
 
     @ViewBuilder static var sizes: some View {
@@ -334,7 +346,6 @@ struct TextPreviews: PreviewProvider {
                 text("Text Bold Extra Large", size: .xLarge, weight: .bold)
             }
         }
-        .padding(.medium)
         .previewDisplayName("Sizes")
     }
 
@@ -365,7 +376,6 @@ struct TextPreviews: PreviewProvider {
                 text("Text Bold Extra Large with a very very very very large and multine content", size: .xLarge, weight: .bold)
             }
         }
-        .padding(.medium)
         .previewDisplayName("Multiline")
     }
 
@@ -406,7 +416,6 @@ struct TextPreviews: PreviewProvider {
                     .environment(\.sizeCategory, .accessibilityExtraExtraExtraLarge)
             }
         }
-        .padding()
         .previewLayout(.sizeThatFits)
         .previewDisplayName("Custom")
     }
@@ -414,7 +423,7 @@ struct TextPreviews: PreviewProvider {
     static var snapshotsSizing: some View {
         VStack(spacing: .medium) {
             standalone
-                .border(Color.cloudDark)
+                .border(Color.cloudDarker, width: .hairline)
             storybook
         }
     }
@@ -431,7 +440,7 @@ struct TextPreviews: PreviewProvider {
                         """,
                         accentColor: .redNormal
                     )
-                    .border(Color.cloudDark)
+                    .border(Color.cloudDarker, width: .hairline)
                     .padding(.trailing, 200 * (1 - state.wrappedValue.0))
 
                     Slider(
@@ -486,7 +495,6 @@ struct TextPreviews: PreviewProvider {
                     .border(Color.cloudDark)
                 }
             }
-            .padding()
             .previewDisplayName("Live Preview")
             .previewLayout(.sizeThatFits)
         }
@@ -494,10 +502,8 @@ struct TextPreviews: PreviewProvider {
 
     static var attributedTextSnapshots: some View {
         VStack(alignment: .leading, spacing: .medium) {
-
             Text("An <ref>attributed</ref> text <a href=\"..\">link</a>", accentColor: .orangeNormal)
                 .border(Color.cloudDarker)
-                .padding()
 
             Text(
                 """
@@ -507,7 +513,6 @@ struct TextPreviews: PreviewProvider {
                 """,
                 lineSpacing: .small
             )
-            .padding()
 
             Text(
                 """
@@ -517,50 +522,14 @@ struct TextPreviews: PreviewProvider {
                 """,
                 lineSpacing: .small
             )
-            .padding()
-
-            Button("An <ref><u>attributed</u></ref> button")
-                .padding(.horizontal)
-
-            ButtonLink("An <ref>attributed</ref> <u>button</u> <applink1>link</applink1>")
-                .padding(.horizontal)
-
-            Card("Attributed alert inside Card", action: .buttonLink("Edit")) {
-                Alert(
-                    "Alert",
-                    description: "<strong>Strong</strong> description with <a href=\"https://www.apple.com\">link</a>",
-                    icon: .alert,
-                    buttons: .primary("<strong>OK</strong> then, why <u>not</u>"),
-                    status: .warning
-                )
-            }
-
-            Card("Attributed text inside Card", action: .buttonLink("Edit")) {
-                Text(
-                    """
-                    An <ref>attributed text</ref> that can contain <a href="https://kiwi.com">multiple</a> \
-                    HTML <a href="https://www.apple.com">links</a> with \
-                    <u>underline</u> and <strong>strong</strong> support.
-                    """,
-                    accentColor: .orangeNormal
-                )
-
-                HStack {
-                    Badge("<strong>Strong</strong> badge <u>label</u>", icon: .accommodation)
-                    Badge("<strong>Strong</strong> badge <u>label</u>", style: .status(.success, inverted: true))
-                    Spacer(minLength: 0)
-                }
-                BadgeList("<strong>Strong</strong> badge <u>label</u>", icon: .accommodation, style: .status(.success))
-            }
         }
-        .padding(.vertical)
-        .background(Color.cloudLight)
         .previewDisplayName("Attributed Text")
         .previewLayout(.sizeThatFits)
     }
 
     static var snapshot: some View {
         storybook
+            .padding(.medium)
     }
 
     @ViewBuilder static func text(_ content: String, size: Text.Size, weight: Font.Weight) -> some View {
@@ -583,6 +552,7 @@ struct TextDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -593,9 +563,8 @@ struct TextDynamicTypePreviews: PreviewProvider {
                 Text("<strong>M</strong>")
                 Text("<a href=\"..\">M</a>")
             }
-            .border(Color.cloudDark)
+            .border(Color.cloudDarker, width: .hairline)
         }
-        .padding(.xSmall)
 
         TextPreviews.storybook
     }

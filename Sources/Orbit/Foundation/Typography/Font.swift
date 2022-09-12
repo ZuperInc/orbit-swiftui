@@ -15,15 +15,15 @@ public extension Font {
     ]
 
     /// Creates Orbit font.
-    static func orbit(size: CGFloat, weight: Weight = .regular, style: Font.TextStyle = .body) -> Font {
+    static func orbit(size: CGFloat, scaledSize: CGFloat, weight: Weight = .regular, style: Font.TextStyle = .body) -> Font {
 
         if orbitFontNames.isEmpty {
-            return .system(size: size, weight: weight)
+            return nonScalingSystemFont(size: scaledSize, weight: weight)
         }
 
         guard let fontName = orbitFontNames[weight] else {
             assertionFailure("Unsupported font weight")
-            return .system(size: size, weight: weight)
+            return nonScalingSystemFont(size: scaledSize, weight: weight)
         }
 
         return customFont(fontName, size: size, style: style)
@@ -79,6 +79,10 @@ public extension Font {
         return font
     }
 
+    private static func nonScalingSystemFont(size: CGFloat, weight: Font.Weight) -> Font {
+        .system(size: size, weight: weight)
+    }
+
     private static func customFont(_ name: String, size: CGFloat, style: Font.TextStyle = .body) -> Font {
         if #available(iOS 14.0, *) {
             return .custom(name, size: size, relativeTo: style)
@@ -119,5 +123,15 @@ public extension ContentSizeCategory {
         case .accessibilityExtraExtraExtraLarge:    return UIDevice.current.userInterfaceIdiom == .phone ? 3.1 : 3.2
         @unknown default:                           return UIDevice.current.userInterfaceIdiom == .phone ? 1 : 1.2
         }
+    }
+
+    /// Effective size ratio for controls, based on font size ratio.
+    var controlRatio: CGFloat {
+        1 + (max(1, ratio) - 1) * 0.5
+    }
+
+    @available(iOS, deprecated: 15.0, message: "Use DynamicTypeSize.isAccessibilitySize instead from iOS 15.0")
+    var isAccessibilitySize: Bool {
+        ratio >= 1.6
     }
 }

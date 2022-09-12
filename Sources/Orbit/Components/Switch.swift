@@ -10,9 +10,10 @@ public struct Switch: View {
     public static let dotDiameter: CGFloat = 10
     
     static let borderColor = Color(white: 0.2, opacity: 0.25)
-    static let shadowColor: Color = .inkNormal.opacity(0.2)
+    static let animation = Animation.spring(response: 0.25, dampingFraction: 0.6)
 
     @Environment(\.sizeCategory) var sizeCategory
+    @Environment(\.colorScheme) var colorScheme
     @Binding private var isOn: Bool
 
     let hasIcon: Bool
@@ -24,9 +25,7 @@ public struct Switch: View {
             .accessibility(addTraits: [.isButton])
             .onTapGesture {
                 HapticsProvider.sendHapticFeedback(.light(0.5))
-                withAnimation(.spring(response: 0.25, dampingFraction: 0.6)) {
-                    isOn.toggle()
-                }
+                isOn.toggle()
             }
             .disabled(isEnabled == false)
     }
@@ -35,24 +34,34 @@ public struct Switch: View {
         Capsule(style: .circular)
             .frame(width: width, height: height)
             .foregroundColor(tint)
+            .animation(Self.animation, value: isOn)
     }
 
     @ViewBuilder var indicator: some View {
         Circle()
             .frame(width: circleDiameter, height: circleDiameter)
-            .foregroundColor(.whiteNormal)
-            .shadow(color: Self.shadowColor.opacity(isEnabled ? 1 : 0), radius: 2.5, y: 1.5)
+            .foregroundColor(indicatorColor)
+            .elevation(
+                isEnabled ? .custom(opacity: 0.25, radius: 1.4, y: 1.2) : nil,
+                shape: .roundedRectangle(borderRadius: circleDiameter / 2)
+            )
             .overlay(
                 Circle()
                     .strokeBorder(Self.borderColor, lineWidth: BorderWidth.hairline)
             )
             .overlay(indicatorSymbol)
             .offset(x: isOn ? width / 5 : -width / 5)
+            .animation(Self.animation, value: isOn)
     }
 
     @ViewBuilder var indicatorSymbol: some View {
         if hasIcon {
-            Icon(isOn ? .lock : .lockOpen, size: .small, color: iconTint)
+            Icon(
+                isOn ? .lock : .lockOpen,
+                size: .custom(Icon.Size.small.value * sizeCategory.controlRatio),
+                color: iconTint
+            )
+            .environment(\.sizeCategory, .large)
         } else {
             Circle()
                 .foregroundColor(tint)
@@ -61,7 +70,7 @@ public struct Switch: View {
     }
 
     var tint: Color {
-        (isOn ? Color.blueNormal : Color.cloudDarker)
+        (isOn ? .blueNormal : capsuleBackgroundColor)
             .opacity(isEnabled ? 1 : 0.5)
     }
 
@@ -70,20 +79,28 @@ public struct Switch: View {
             .opacity(isEnabled ? 1 : 0.5)
     }
 
+    var capsuleBackgroundColor: Color {
+        colorScheme == .light ? .cloudDarker : .cloudDarker
+    }
+
+    var indicatorColor: Color {
+        colorScheme == .light ? .whiteNormal : .cloudDark
+    }
+
     var width: CGFloat {
-        Self.size.width * sizeCategory.ratio
+        Self.size.width * sizeCategory.controlRatio
     }
 
     var height: CGFloat {
-        Self.size.height * sizeCategory.ratio
+        Self.size.height * sizeCategory.controlRatio
     }
 
     var circleDiameter: CGFloat {
-        Self.circleDiameter * sizeCategory.ratio
+        Self.circleDiameter * sizeCategory.controlRatio
     }
 
     var dotDiameter: CGFloat {
-        Self.dotDiameter * sizeCategory.ratio
+        Self.dotDiameter * sizeCategory.controlRatio
     }
 
     /// Creates Orbit Switch component.
@@ -101,7 +118,10 @@ struct SwitchPreviews: PreviewProvider {
         PreviewWrapper {
             standalone
             storybook
+            storybook
+                .preferredColorScheme(.dark)
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -109,7 +129,6 @@ struct SwitchPreviews: PreviewProvider {
         StateWrapper(initialState: true) { state in
             Switch(isOn: state)
         }
-        .padding(.medium)
     }
 
     static var storybook: some View {
@@ -127,11 +146,11 @@ struct SwitchPreviews: PreviewProvider {
                 switchView(isOn: false, hasIcon: true, isEnabled: false)
             }
         }
-        .padding(.medium)
     }
 
     static var snapshot: some View {
         storybook
+            .padding(.medium)
     }
 
     static func switchView(isOn: Bool, hasIcon: Bool = false, isEnabled: Bool = true) -> some View {
@@ -152,6 +171,7 @@ struct SwitchDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 

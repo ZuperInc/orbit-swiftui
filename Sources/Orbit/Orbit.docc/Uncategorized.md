@@ -14,7 +14,6 @@ Supporting types and components under development.
 
 ### Layout
 
-- ``ContainerWidth``
 - ``ContentHeightReader``
 - ``SingleAxisGeometryReader``
 - ``Strut``
@@ -22,13 +21,14 @@ Supporting types and components under development.
 
 ### Xcode previews support
 
-- ``PreviewWrapper``
 - ``StateWrapper``
 
 ### SwiftUI environment
 
+- ``IsElevationEnabledKey``
 - ``IsExpandedKey``
 - ``IsFadeInKey``
+- ``IsTileSeparatorVisibleKey``
 
 ### Other
 
@@ -38,6 +38,7 @@ Supporting types and components under development.
 - ``ChoiceTile``
 - ``ChoiceTileAlignment``
 - ``ChoiceTileIndicator``
+- ``ElevationShape``
 - ``FormFieldLabel``
 - ``FormFieldMessage``
 - ``FormFieldWrapper``

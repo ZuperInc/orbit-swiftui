@@ -8,7 +8,8 @@ import SwiftUI
 /// - Note: [Orbit definition](https://orbit.kiwi/components/badge/)
 public struct Badge: View {
 
-    public static let verticalPadding: CGFloat = 4 + 1/3 // Makes height exactly 24 at normal text size
+    public static let verticalPadding: CGFloat = 4 + 1/3 // Results in ±24 height at normal text size
+    public static let textSize: Text.Size = .small
 
     let label: String
     let iconContent: Icon.Content
@@ -37,7 +38,6 @@ public struct Badge: View {
                     .padding(.vertical, Self.verticalPadding)
             }
             .padding(.horizontal, .xSmall)
-            .frameWidthAtLeastHeight()
             .background(
                 style.background
                     .clipShape(shape)
@@ -46,7 +46,6 @@ public struct Badge: View {
                 shape
                     .strokeBorder(style.outlineColor, lineWidth: BorderWidth.thin)
             )
-            .fixedSize()
         }
     }
 
@@ -104,7 +103,7 @@ public extension Badge {
 
         @ViewBuilder public var background: some View {
             switch self {
-                case .light:                                Color.whiteNormal
+                case .light:                                Color.whiteDarker
                 case .lightInverted:                        Color.inkNormal
                 case .neutral:                              Color.cloudLight
                 case .status(.info, false):                 Color.blueLight
@@ -151,6 +150,7 @@ struct BadgePreviews: PreviewProvider {
             storybookGradient
             storybookMix
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -161,23 +161,26 @@ struct BadgePreviews: PreviewProvider {
             Badge()    // EmptyView
             Badge("")  // EmptyView
         }
-        .padding(.medium)
     }
 
     static var sizing: some View {
         VStack(spacing: .xSmall) {
             StateWrapper(initialState: CGFloat(0)) { state in
                 ContentHeightReader(height: state) {
-                    Badge("Badge height \(state.wrappedValue)")
+                    Badge("Height \(state.wrappedValue.rounded())")
                 }
             }
             StateWrapper(initialState: CGFloat(0)) { state in
                 ContentHeightReader(height: state) {
-                    Badge("Badge height \(state.wrappedValue)", icon: .grid)
+                    Badge("Height \(state.wrappedValue.rounded())", icon: .grid)
+                }
+            }
+            StateWrapper(initialState: CGFloat(0)) { state in
+                ContentHeightReader(height: state) {
+                    Badge("Multiline text\nheight \(state.wrappedValue.rounded())", icon: .grid)
                 }
             }
         }
-        .padding(.medium)
     }
 
     static var storybook: some View {
@@ -193,8 +196,12 @@ struct BadgePreviews: PreviewProvider {
             statusBadges(.success)
             statusBadges(.warning)
             statusBadges(.critical)
+
+            HStack(alignment: .top, spacing: .medium) {
+                Badge("Very very very very very long badge")
+                Badge("Very very very very very long badge")
+            }
         }
-        .padding(.medium)
     }
 
     static var storybookGradient: some View {
@@ -203,7 +210,6 @@ struct BadgePreviews: PreviewProvider {
             gradientBadge(.bundleMedium)
             gradientBadge(.bundleTop)
         }
-        .padding(.medium)
         .previewDisplayName("Gradient")
     }
 
@@ -227,20 +233,23 @@ struct BadgePreviews: PreviewProvider {
             HStack(spacing: .small) {
                 Badge("Image", icon: .image(.orbit(.facebook)))
                 Badge("Image", icon: .image(.orbit(.facebook)), style: .status(.success, inverted: true))
+            }
+
+            HStack(spacing: .small) {
                 Badge("SF Symbol", icon: .sfSymbol("info.circle.fill"))
                 Badge("SF Symbol", icon: .sfSymbol("info.circle.fill"), style: .status(.warning, inverted: true))
             }
         }
-        .padding(.medium)
         .previewDisplayName("Mix")
     }
 
     static var snapshot: some View {
         storybook
+            .padding(.medium)
     }
 
     static func badges(_ style: Badge.Style) -> some View {
-        HStack(spacing: .medium) {
+        HStack(spacing: .small) {
             Badge("label", style: style)
             Badge("label", icon: .grid, style: style)
             Badge(icon: .grid, style: style)
@@ -274,6 +283,7 @@ struct BadgeDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 

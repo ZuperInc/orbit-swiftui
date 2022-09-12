@@ -1,12 +1,21 @@
 import SwiftUI
 import UIKit
 
+/// Style variant for Orbit InputField component.
+public enum InputFieldStyle {
+
+    /// Style with label positioned above the InputField.
+    case `default`
+    /// Style with compact label positioned inside the InputField.
+    case compact
+}
+
 /// Also known as textbox. Offers users a simple input for a form.
 ///
 /// When you have additional information or helpful examples, include placeholder text to help users along.
 ///
 /// - Note: [Orbit definition](https://orbit.kiwi/components/inputfield/)
-/// - Important: Component expands horizontally to infinity.
+/// - Important: Component expands horizontally unless prevented by `fixedSize` modifier.
 public struct InputField<Value>: View where Value: LosslessStringConvertible {
 
     private enum Mode {
@@ -17,9 +26,12 @@ public struct InputField<Value>: View where Value: LosslessStringConvertible {
     @Binding private var value: Value
     @Binding private var messageHeight: CGFloat
     @State private var isEditing: Bool = false
-    @State private var isSecureTextEntry: Bool = true
+    @State private var isSecureTextRedacted: Bool = true
 
     let label: String
+    let labelAccentColor: UIColor?
+    let labelLinkColor: TextLink.Color
+    let labelLinkAction: TextLink.Action
     let placeholder: String
     let prefix: Icon.Content
     let suffix: Icon.Content
@@ -30,12 +42,20 @@ public struct InputField<Value>: View where Value: LosslessStringConvertible {
     let isAutocompleteEnabled: Bool
     let passwordStrength: PasswordStrengthIndicator.PasswordStrength
     let message: MessageType
+    let style: InputFieldStyle
     let suffixAction: (() -> Void)?
 
     private let mode: Mode
 
     public var body: some View {
-        FormFieldWrapper(label, message: message, messageHeight: $messageHeight) {
+        FormFieldWrapper(
+            formFieldLabel,
+            labelAccentColor: labelAccentColor,
+            labelLinkColor: labelLinkColor,
+            labelLinkAction: labelLinkAction,
+            message: message,
+            messageHeight: $messageHeight
+        ) {
             InputContent(
                 prefix: prefix,
                 suffix: suffix,
@@ -44,20 +64,20 @@ public struct InputField<Value>: View where Value: LosslessStringConvertible {
                 isEditing: isEditing,
                 suffixAction: suffixAction
             ) {
-                HStack(spacing: 0) {
+                HStack(alignment: .firstTextBaseline, spacing: .small) {
+                    compactLabel
+
                     input
                         .textFieldStyle(TextFieldStyle(leadingPadding: 0))
                         .autocapitalization(autocapitalization)
                         .disableAutocorrection(isAutocompleteEnabled == false)
                         .textContentType(textContent)
                         .keyboardType(keyboard)
-                        .font(.orbit(size: Text.Size.normal.value, weight: .regular))
+                        .orbitFont(size: Text.Size.normal.value, style: .body)
                         .accentColor(.blueNormal)
                         .background(textFieldPlaceholder, alignment: .leading)
                         .disabled(state == .disabled)
                         .accessibility(.inputValue)
-                    button
-                        .opacity(state == .disabled ? 0 : 1)
                 }
             }
         } messageContent: {
@@ -71,20 +91,14 @@ public struct InputField<Value>: View where Value: LosslessStringConvertible {
         .accessibility(addTraits: .isButton)
     }
 
-    @ViewBuilder var button: some View {
-        if case .actionsHandler = mode {
-            if isSecure {
-                securedSuffix
-            } else {
-                clearButton
-            }
-        }
-    }
     @ViewBuilder var input: some View {
         switch mode {
             case .actionsHandler(let onEditingChanged, let onCommit, let isSecure):
                 if isSecure {
-                    secureField(onEditingChanged: onEditingChanged, onCommit: onCommit)
+                    HStack(spacing: 0) {
+                        secureField(onEditingChanged: onEditingChanged, onCommit: onCommit)
+                        secureTextRedactedToggle
+                    }
                 } else {
                     textField(onEditingChanged: onEditingChanged, onCommit: onCommit)
                 }
@@ -94,36 +108,30 @@ public struct InputField<Value>: View where Value: LosslessStringConvertible {
     }
 
     @ViewBuilder var textFieldPlaceholder: some View {
-        if value.description.isEmpty {
+        if showPlaceholder {
             Text(placeholder, color: .none)
                 .foregroundColor(state.placeholderColor)
         }
     }
-    
-    @ViewBuilder var clearButton: some View {
-        if value.description.isEmpty == false, state != .disabled {
-            Icon(sfSymbol: "multiply.circle.fill", color: .inkLighter)
-                .padding(.small)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    value = Value.init("") ?? value
-                }
-                .accessibility(addTraits: .isButton)
-                .accessibility(.inputFieldClear)
+
+    @ViewBuilder var compactLabel: some View {
+        if style == .compact {
+            Text(label, color: .custom(compactLabelColor), weight: .medium)
         }
     }
 
-    @ViewBuilder var securedSuffix: some View {
+    @ViewBuilder var secureTextRedactedToggle: some View {
         if value.description.isEmpty == false, state != .disabled {
-            Icon(isSecureTextEntry ? .visibility : .visibilityOff, color: .inkLight)
+            Icon(isSecureTextRedacted ? .visibility : .visibilityOff, color: .inkLight)
                 .padding(.vertical, .xSmall)
                 .padding(.horizontal, .small)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    isSecureTextEntry.toggle()
+                    isSecureTextRedacted.toggle()
                 }
                 .accessibility(addTraits: .isButton)
                 .accessibility(.inputFieldPasswordToggle)
+                .opacity(state == .disabled ? 0 : 1)
         }
     }
 
@@ -136,7 +144,7 @@ public struct InputField<Value>: View where Value: LosslessStringConvertible {
                 get: { self.value.description },
                 set: { self.value = Value.init($0) ?? self.value }
             ),
-            isSecured: $isSecureTextEntry,
+            isSecured: $isSecureTextRedacted,
             isEditing: $isEditing,
             style: .init(
                 textContentType: textContent,
@@ -166,6 +174,7 @@ public struct InputField<Value>: View where Value: LosslessStringConvertible {
             },
             onCommit: onCommit
         )
+        .padding(.trailing, suffix == .none ? .small : 0)
     }
 
     var isSecure: Bool {
@@ -176,10 +185,23 @@ public struct InputField<Value>: View where Value: LosslessStringConvertible {
                 return false
         }
     }
+
+    var formFieldLabel: String {
+        switch style {
+            case .default:          return label
+            case .compact:          return ""
+        }
+    }
+
+    var compactLabelColor: UIColor {
+        showPlaceholder ? .inkNormal : .inkLighter
+    }
+
+    var showPlaceholder: Bool {
+        value.description.isEmpty
+    }
 }
 
-
-// MARK: - Inits
 public extension InputField {
 
     /// Creates Orbit InputField component.
@@ -190,6 +212,9 @@ public extension InputField {
     ///     - suffixAction: Optional separate action on suffix icon tap.
     init(
         _ label: String = "",
+        labelAccentColor: UIColor? = nil,
+        labelLinkColor: TextLink.Color = .primary,
+        labelLinkAction: @escaping TextLink.Action = { _, _ in },
         value: Binding<Value>,
         prefix: Icon.Content = .none,
         suffix: Icon.Content = .none,
@@ -203,12 +228,16 @@ public extension InputField {
         passwordStrength: PasswordStrengthIndicator.PasswordStrength = .empty,
         message: MessageType = .none,
         messageHeight: Binding<CGFloat> = .constant(0),
+        style: InputFieldStyle = .default,
         onEditingChanged: @escaping (Bool) -> Void = { _ in },
         onCommit: @escaping () -> Void = {},
         suffixAction: (() -> Void)? = nil
     ) where Value == String {
         self.init(
             label,
+            labelAccentColor: labelAccentColor,
+            labelLinkColor: labelLinkColor,
+            labelLinkAction: labelLinkAction,
             value: value,
             prefix: prefix,
             suffix: suffix,
@@ -221,6 +250,7 @@ public extension InputField {
             passwordStrength: passwordStrength,
             message: message,
             messageHeight: messageHeight,
+            style: style,
             mode: .actionsHandler(onEditingChanged: onEditingChanged, onCommit: onCommit, isSecure: isSecure),
             suffixAction: suffixAction
         )
@@ -239,6 +269,9 @@ public extension InputField {
     ///     - suffixAction: Optional separate action on suffix icon tap.
     init(
         _ label: String = "",
+        labelAccentColor: UIColor? = nil,
+        labelLinkColor: TextLink.Color = .primary,
+        labelLinkAction: @escaping TextLink.Action = { _, _ in },
         value: Binding<Value>,
         prefix: Icon.Content = .none,
         suffix: Icon.Content = .none,
@@ -250,11 +283,15 @@ public extension InputField {
         isAutocompleteEnabled: Bool = false,
         message: MessageType = .none,
         messageHeight: Binding<CGFloat> = .constant(0),
+        style: InputFieldStyle = .default,
         formatter: Formatter,
         suffixAction: (() -> Void)? = nil
     ) {
         self.init(
             label,
+            labelAccentColor: labelAccentColor,
+            labelLinkColor: labelLinkColor,
+            labelLinkAction: labelLinkAction,
             value: value,
             prefix: prefix,
             suffix: suffix,
@@ -267,6 +304,7 @@ public extension InputField {
             passwordStrength: .empty,
             message: message,
             messageHeight: messageHeight,
+            style: style,
             mode: .formatter(formatter: formatter),
             suffixAction: suffixAction
         )
@@ -274,8 +312,12 @@ public extension InputField {
 }
 
 extension InputField {
+
     private init(
         _ label: String = "",
+        labelAccentColor: UIColor? = nil,
+        labelLinkColor: TextLink.Color = .primary,
+        labelLinkAction: @escaping TextLink.Action = { _, _ in },
         value: Binding<Value>,
         prefix: Icon.Content = .none,
         suffix: Icon.Content = .none,
@@ -288,10 +330,14 @@ extension InputField {
         passwordStrength: PasswordStrengthIndicator.PasswordStrength = .empty,
         message: MessageType = .none,
         messageHeight: Binding<CGFloat> = .constant(0),
+        style: InputFieldStyle = .default,
         mode: Mode,
         suffixAction: (() -> Void)? = nil
     ) {
         self.label = label
+        self.labelAccentColor = labelAccentColor
+        self.labelLinkColor = labelLinkColor
+        self.labelLinkAction = labelLinkAction
         self._value = value
         self.prefix = prefix
         self.suffix = suffix
@@ -304,6 +350,7 @@ extension InputField {
         self.autocapitalization = autocapitalization
         self.isAutocompleteEnabled = isAutocompleteEnabled
         self.passwordStrength = passwordStrength
+        self.style = style
         self.mode = mode
         self.suffixAction = suffixAction
     }
@@ -332,10 +379,15 @@ public extension InputField {
 struct InputFieldPreviews: PreviewProvider {
 
     static let label = "Field label"
+    static let longLabel = "Very \(String(repeating: "very ", count: 8))long multiline label"
+    static let passwordLabel = "Password label"
     static let value = "Value"
+    static let passwordValue = "someVeryLongPasswordValue"
+    static let longValue = "\(String(repeating: "very ", count: 15))long value"
     static let placeholder = "Placeholder"
     static let helpMessage = "Help message"
     static let errorMessage = "Error message"
+    static let longErrorMessage = "Very \(String(repeating: "very ", count: 8))long error message"
 
     static var previews: some View {
         PreviewWrapper {
@@ -344,6 +396,7 @@ struct InputFieldPreviews: PreviewProvider {
             storybookPassword
             storybookMix
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -351,84 +404,105 @@ struct InputFieldPreviews: PreviewProvider {
         StateWrapper(initialState: value) { state in
             InputField(label, value: state, prefix: .grid, suffix: .grid, placeholder: placeholder, state: .default)
         }
-        .padding(.medium)
     }
 
     static var storybook: some View {
         VStack(spacing: .medium) {
-            inputField(value: "", message: .none)
-            inputField(value: "", message: .help(helpMessage))
-            inputField(value: "", message: .error(errorMessage))
-            Separator()
-            inputField(value: value, message: .none)
-            inputField(value: value, message: .help(helpMessage))
-            inputField(value: value, message: .error(errorMessage))
-        }
-        .padding(.medium)
-    }
+            Group {
+                inputField(value: "", message: .none)
+                inputField(value: "", prefix: .none, message: .help(helpMessage))
+                inputField(value: "", suffix: .none, message: .error(errorMessage))
+                Separator()
+                inputField(value: longValue, prefix: .none, suffix: .none, message: .none)
+                inputField(value: value, message: .help(helpMessage))
+                inputField(value: value, message: .error(errorMessage))
+                Separator()
+            }
 
-    static func inputField(value: String, message: MessageType) -> some View {
-        StateWrapper(initialState: value) { state in
-            InputField(label, value: state, prefix: .grid, suffix: .grid, placeholder: placeholder, message: message)
+            Group {
+                inputField(value: longValue, prefix: .none, suffix: .none, message: .none, style: .compact)
+                inputField(value: "", prefix: .none, suffix: .none, message: .none, style: .compact)
+                inputField(value: "", message: .error(errorMessage), style: .compact)
+                inputField(value: value, message: .error(errorMessage), style: .compact)
+            }
         }
     }
 
     static var storybookPassword: some View {
         VStack(spacing: .medium) {
-            InputField("Password", value: .constant("password"), isSecure: true)
-            InputField("Password", value: .constant(""), placeholder: "Input password", isSecure: true)
-            InputField(
-                "Password",
-                value: .constant("password"),
-                isSecure: true,
-                passwordStrength: .strong(title: "Strong")
-            )
-            InputField(
-                "Password",
-                value: .constant("password"),
-                isSecure: true,
-                passwordStrength: .medium(title: "Medium"),
-                message: .help("Help message")
-            )
-            InputField(
-                "Password",
-                value: .constant("password"),
-                isSecure: true,
-                passwordStrength: .weak(title: "Weak"),
-                message: .error("Error message")
-            )
+            inputField(passwordLabel, value: passwordValue, isSecure: true)
+            inputField(passwordLabel, value: "", prefix: .none, placeholder: "Input password", isSecure: true)
+            inputField(passwordLabel, value: passwordValue, suffix: .none, isSecure: true, passwordStrength: .weak(title: "Weak"), message: .error("Error message"))
+            inputField(passwordLabel, value: passwordValue, prefix: .none, suffix: .none, isSecure: true, passwordStrength: .medium(title: "Medium"), message: .help("Help message"))
+            inputField(passwordLabel, value: passwordValue, isSecure: true, passwordStrength: .strong(title: "Strong"))
         }
-        .padding(.medium)
     }
 
     static var storybookMix: some View {
         VStack(spacing: .medium) {
-            InputField("Empty", value: .constant(""), prefix: .symbol(.grid, color: .blueDark), suffix: .symbol(.grid, color: .blueDark), placeholder: placeholder)
-            InputField("Disabled, Empty", value: .constant(""), prefix: .countryFlag("cz"), suffix: .countryFlag("us"), placeholder: placeholder, state: .disabled)
-            InputField("Disabled", value: .constant("Disabled Value"), prefix: .sfSymbol("info.circle.fill"), suffix: .sfSymbol("info.circle.fill"), placeholder: placeholder, state: .disabled)
-            InputField("Default", value: .constant("InputField Value"))
-            InputField("Modified", value: .constant("Modified value"), state: .modified)
-            InputField("Focused", value: .constant("Focus / Help"), message: .help("Help message"))
-            InputField(
-                "InputField with a long multiline label to test that it works",
-                value: .constant("Error value with a very long length to test that it works"),
-                message: .error("Error message, also very long and multi-line to test that it works.")
-            ).padding(.bottom, .small)
+            inputField("Empty", value: "", prefix: .symbol(.grid, color: .blueDark), suffix: .symbol(.grid, color: .blueDark))
+            inputField("Disabled, Empty", value: "", prefix: .countryFlag("cz"), suffix: .countryFlag("us"), state: .disabled)
+            inputField("Disabled", value: "Disabled Value", prefix: .sfSymbol("info.circle.fill"), suffix: .sfSymbol("info.circle.fill"), state: .disabled)
+            inputField("Modified from previous state", value: "Modified value", state: .modified)
+            inputField("Focused", value: "Focused / Help", message: .help("Help message"))
+            inputField(
+                FormFieldLabelPreviews.longLabel,
+                labelAccentColor: .orangeNormal,
+                labelLinkColor: .status(.critical),
+                value: longValue,
+                message: .error(longErrorMessage)
+            )
+            inputField("Compact", style: .compact)
 
             HStack(spacing: .medium) {
-                InputField(value: .constant("No label"))
-                InputField(value: .constant("Flag prefix"), prefix: .countryFlag("us"))
+                inputField(value: "No label")
+                inputField(value: "Flag prefix", prefix: .countryFlag("us"))
             }
         }
-        .padding(.medium)
+    }
+
+    static func inputField(
+        _ label: String = label,
+        labelAccentColor: UIColor? = nil,
+        labelLinkColor: TextLink.Color = .primary,
+        labelLinkAction: @escaping TextLink.Action = { _, _ in },
+        value: String = value,
+        prefix: Icon.Content = .grid,
+        suffix: Icon.Content = .grid,
+        placeholder: String = placeholder,
+        state: InputState = .default,
+        isSecure: Bool = false,
+        passwordStrength: PasswordStrengthIndicator.PasswordStrength = .empty,
+        message: MessageType = .none,
+        style: InputFieldStyle = .default
+    ) -> some View {
+        StateWrapper(initialState: value) { value in
+            InputField(
+                label,
+                labelAccentColor: labelAccentColor,
+                labelLinkColor: labelLinkColor,
+                labelLinkAction: labelLinkAction,
+                value: value,
+                prefix: prefix,
+                suffix: suffix,
+                placeholder: placeholder,
+                state: state,
+                isSecure: isSecure,
+                passwordStrength: passwordStrength,
+                message: message,
+                style: style
+            )
+        }
     }
     
     static var snapshot: some View {
-        VStack(spacing: .xLarge) {
-            storybook
-            Separator()
-            storybookPassword
-        }
+        storybook
+            .padding(.medium)
+    }
+
+    static var snapshotPassword: some View {
+        storybookPassword
+            .padding(.medium)
     }
 }
 
@@ -468,69 +542,68 @@ struct InputFieldLivePreviews: PreviewProvider {
         }
 
         var body: some View {
-            VStack(alignment: .leading, spacing: .medium) {
-                Heading("Heading", style: .title2)
-
-                Text("Some text, but also very long and multi-line to test that it works.")
-
-                InputField(
-                    "InputField",
-                    value: $textValue,
-                    suffix: .email,
-                    placeholder: "Placeholder",
-                    state: .disabled,
-                    message: message,
-                    suffixAction: {
-                        intValue = 1
-                    }
-                )
-
-                Text("Some text, but also very long and multi-line to test that it works.")
-
-                Spacer()
-
+            ScrollView {
                 VStack(alignment: .leading, spacing: .medium) {
-                    Text("InputField uppercasing the input, but not changing projected value:")
-                    
+                    Heading("Heading", style: .title2)
+
+                    Text("Some text, but also very long and multi-line to test that it works.")
+
                     InputField(
+                        "InputField",
                         value: $textValue,
-                        placeholder: "Uppercased",
-                        formatter: UppercaseAlphabetFormatter()
+                        suffix: .email,
+                        placeholder: "Placeholder",
+                        state: .disabled,
+                        message: message,
+                        suffixAction: {
+                            intValue = 1
+                        }
                     )
 
-                    Text("Number: \(intValue)")
+                    Text("Some text, but also very long and multi-line to test that it works.")
 
-                    InputField(
-                        value: $intValue,
-                        placeholder: "Decimal formatter",
-                        formatter: formatter
-                    )
-                }
+                    VStack(alignment: .leading, spacing: .medium) {
+                        Text("InputField uppercasing the input, but not changing projected value:")
 
-                Spacer()
-                Spacer()
+                        InputField(
+                            value: $textValue,
+                            placeholder: "Uppercased",
+                            formatter: UppercaseAlphabetFormatter()
+                        )
 
-                Button("Change") {
-                    switch message {
-                        case .none:
-                            message = .normal("Secondary label")
-                        case .normal:
-                            message = .help(
-                                "Help message, but also very long and multi-line to test that it works."
-                            )
-                        case .help:
-                            message = .warning("Warning text")
-                        case .warning:
-                            message = .error(
-                                "Error message, also very long and multi-line to test that it works."
-                            )
-                        case .error:
-                            message = .none
+                        Text("Number: \(intValue)")
+
+                        InputField(
+                            value: $intValue,
+                            placeholder: "Decimal formatter",
+                            formatter: formatter
+                        )
+                    }
+
+                    Spacer(minLength: 0)
+
+                    Button("Change") {
+                        switch message {
+                            case .none:
+                                message = .normal("Secondary label")
+                            case .normal:
+                                message = .help(
+                                    "Help message, but also very long and multi-line to test that it works."
+                                )
+                            case .help:
+                                message = .warning("Warning text")
+                            case .warning:
+                                message = .error(
+                                    "Error message, also very long and multi-line to test that it works."
+                                )
+                            case .error:
+                                message = .none
+                        }
                     }
                 }
+                .animation(.easeOut(duration: 0.25), value: message)
+                .padding(.medium)
             }
-            .animation(.easeOut(duration: 0.25), value: message)
-            .padding()
             .previewDisplayName("Run Live Preview with Input Field")
         }
 
@@ -542,11 +615,9 @@ struct InputFieldLivePreviews: PreviewProvider {
     }
 
     static var securedWrapper: some View {
-
-        StateWrapper(initialState: "") { state in
-
+        StateWrapper(initialState: "textfield-should-respect-long-password-and-screen-bounds-1234567890") { state in
             VStack(alignment: .leading, spacing: .medium) {
-                Heading("Heading", style: .title2)
+                Heading("Secured TextField with long init value", style: .title2)
 
                 InputField(
                     value: state,

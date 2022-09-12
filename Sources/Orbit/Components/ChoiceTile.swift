@@ -20,11 +20,13 @@ public enum ChoiceTileAlignment {
 /// Enables users to encapsulate radio or checkbox to pick exactly one option from a group.
 ///
 /// - Note: [Orbit definition](https://orbit.kiwi/components/choice-tile/)
-/// - Important: Component expands horizontally to infinity.
+/// - Important: Component expands horizontally unless prevented by `fixedSize` or `idealSize` modifier.
 public struct ChoiceTile<Content: View>: View {
 
+    @Environment(\.idealSize) var idealSize
+
     public let padding: CGFloat = .small
-    public let verticalTextPadding: CGFloat = .xxSmall - 1/6    // Makes height exactly 52 at normal text size
+    public let verticalTextPadding: CGFloat = .xxSmall - 1/6    // Results in ±52 height at normal text size
 
     let title: String
     let description: String
@@ -61,7 +63,7 @@ public struct ChoiceTile<Content: View>: View {
                 .padding(.top, badgeOverlay.isEmpty ? 0 : .small)
                 .overlay(indicatorOverlay, alignment: indicatorAlignment)
                 .padding(padding)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: idealSize.horizontal ? nil: .infinity, alignment: .leading)
             }
         )
         .buttonStyle(TileButtonStyle(isSelected: isSelected, status: errorShouldHighlightBorder ? .critical : nil))
@@ -92,10 +94,13 @@ public struct ChoiceTile<Content: View>: View {
                             Text(description, color: .inkLight)
                                 .accessibility(.choiceTileDescription)
                         }
-                        
-                        Spacer(minLength: .xSmall)
+
+                        if idealSize.horizontal == false {
+                            Spacer(minLength: 0)
+                        }
                         
                         Badge(badge, style: .status(.info))
+                            .padding(.leading, .xSmall)
                             .accessibility(.choiceTileBadge)
                     }
                 case .center:
@@ -108,6 +113,7 @@ public struct ChoiceTile<Content: View>: View {
                                 .frame(height: 68)
                                 .padding(.bottom, .xxSmall)
                         }
+
                         Heading(title, style: titleStyle, alignment: .center)
                             .accessibility(.choiceTileTitle)
 
@@ -117,7 +123,7 @@ public struct ChoiceTile<Content: View>: View {
                         Badge(badge, style: .neutral)
                             .accessibility(.choiceTileBadge)
                     }
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: idealSize.horizontal ? nil : .infinity)
             }
         }
     }
@@ -275,11 +281,13 @@ struct ChoiceTilePreviews: PreviewProvider {
             standalone
             standaloneCentered
             sizing
+            intrinsic
 
             storybook
             storybookCentered
             storybookMix
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -291,9 +299,8 @@ struct ChoiceTilePreviews: PreviewProvider {
             badge: "Popular",
             message: .help("Message")
         ) {
-            customContentPlaceholder
+            contentPlaceholder
         }
-        .padding(.medium)
     }
 
     static var sizing: some View {
@@ -320,7 +327,6 @@ struct ChoiceTilePreviews: PreviewProvider {
             }
         }
         .fixedSize(horizontal: false, vertical: true)
-        .padding(.medium)
         .background(Color.whiteNormal)
         .previewDisplayName("Sizing")
     }
@@ -335,20 +341,26 @@ struct ChoiceTilePreviews: PreviewProvider {
             message: .help("Message"),
             alignment: .center
         ) {
-            customContentPlaceholder
+            contentPlaceholder
         }
-        .padding(.medium)
         .previewDisplayName("Centered")
     }
 
+    static var intrinsic: some View {
+        ChoiceTile("Intrinsic", icon: .grid) {
+            intrinsicContentPlaceholder
+        }
+        .idealSize()
+    }
+
     static var storybook: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: .medium) {
             content
         }
     }
 
     static var storybookCentered: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: .medium) {
             contentCentered
         }
     }
@@ -363,7 +375,9 @@ struct ChoiceTilePreviews: PreviewProvider {
                     isSelected: isSelected.wrappedValue,
                     message: .help("Info multiline and very very very very long message")
                 ) {
-                    customContentPlaceholder
+                    isSelected.wrappedValue.toggle()
+                } content: {
+                    contentPlaceholder
                 }
             }
             StateWrapper(initialState: false) { isSelected in
@@ -373,17 +387,22 @@ struct ChoiceTilePreviews: PreviewProvider {
                     isSelected: isSelected.wrappedValue,
                     message: .warning("Warning multiline and very very very very long message")
                 ) {
-                    customContentPlaceholder
+                    isSelected.wrappedValue.toggle()
+                } content: {
+                    contentPlaceholder
                 }
             }
             StateWrapper(initialState: false) { isSelected in
-                ChoiceTile(isSelected: isSelected.wrappedValue) {
+                ChoiceTile(
+                    isSelected: isSelected.wrappedValue
+                ) {
+                    isSelected.wrappedValue.toggle()
+                } content: {
                     Color.greenLight
                         .overlay(Text("Custom content, no header"))
                 }
             }
         }
-        .padding(.medium)
     }
 
     @ViewBuilder static var content: some View {
@@ -414,6 +433,7 @@ struct ChoiceTilePreviews: PreviewProvider {
             Separator()
             standaloneCentered
         }
+        .padding(.medium)
     }
 
     static func choiceTile(titleStyle: Heading.Style, showHeader: Bool, isError: Bool, isSelected: Bool) -> some View {
@@ -428,10 +448,9 @@ struct ChoiceTilePreviews: PreviewProvider {
             ) {
                 state.wrappedValue.toggle()
             } content: {
-                customContentPlaceholder
+                contentPlaceholder
             }
         }
-        .padding(.medium)
     }
 
     static func choiceTileCentered(titleStyle: Heading.Style, showIllustration: Bool, isError: Bool, isSelected: Bool) -> some View {
@@ -449,10 +468,9 @@ struct ChoiceTilePreviews: PreviewProvider {
             ) {
                 state.wrappedValue.toggle()
             } content: {
-                customContentPlaceholder
+                contentPlaceholder
             }
         }
-        .padding(.medium)
     }
 }
 
@@ -468,6 +486,7 @@ struct ChoiceTileDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 

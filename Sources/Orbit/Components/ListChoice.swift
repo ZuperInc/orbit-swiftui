@@ -25,10 +25,12 @@ public enum ListChoiceDisclosure: Equatable {
 /// Shows one of a selectable list of items with similar structures.
 ///
 /// - Note: [Orbit definition](https://orbit.kiwi/components/listchoice/)
-/// - Important: Component expands horizontally up to ``Layout/readableMaxWidth``.
+/// - Important: Component expands horizontally unless prevented by `fixedSize` or `idealSize` modifier.
 public struct ListChoice<HeaderContent: View, Content: View>: View {
 
-    public let verticalPadding: CGFloat = .small + 1/3   // Makes height exactly 45 at normal text size
+    public let verticalPadding: CGFloat = .small + 1/3   // Results in ±45 height at normal text size
+
+    @Environment(\.idealSize) var idealSize
 
     let title: String
     let description: String
@@ -73,7 +75,7 @@ public struct ListChoice<HeaderContent: View, Content: View>: View {
                 .padding(.vertical, .small)
                 .disabled(true)
         }
-        .frame(maxWidth: Layout.readableMaxWidth, alignment: .leading)
+        .frame(maxWidth: idealSize.horizontal ? nil : .infinity, alignment: .leading)
         .overlay(separator, alignment: .bottom)
     }
     
@@ -81,9 +83,10 @@ public struct ListChoice<HeaderContent: View, Content: View>: View {
         if isHeaderEmpty == false || isCustomHeaderEmpty == false {
             HStack(spacing: 0) {
                 headerTexts
+                    .padding(.trailing, .xSmall)
 
-                if isHeaderEmpty == false {
-                    Spacer(minLength: .xSmall)
+                if isHeaderEmpty == false, idealSize.horizontal == false {
+                    Spacer(minLength: 0)
                 }
 
                 TextStrut(.large)
@@ -374,7 +377,7 @@ extension ListChoice {
         }
 
         func backgroundColor(isPressed: Bool) -> Color {
-            isPressed ? .inkLight.opacity(0.08) : .whiteNormal
+            isPressed ? .inkLight.opacity(0.06) : .clear
         }
     }
 }
@@ -394,6 +397,7 @@ struct ListChoicePreviews: PreviewProvider {
     static var previews: some View {
         PreviewWrapper {
             standalone
+            intrinsic
             sizing
             plain
             radio
@@ -405,9 +409,9 @@ struct ListChoicePreviews: PreviewProvider {
     }
 
     static var standalone: some View {
-        VStack {
+        VStack(spacing: 0) {
             ListChoice(title, description: description, icon: .grid) {
-                customContentPlaceholder
+                contentPlaceholder
             } headerContent: {
                 headerContent
             }
@@ -415,6 +419,15 @@ struct ListChoicePreviews: PreviewProvider {
             // Empty
             ListChoice(disclosure: .none)
         }
+    }
+
+    static var intrinsic: some View {
+        ListChoice(title, description: description, icon: .grid) {
+            intrinsicContentPlaceholder
+        } headerContent: {
+            intrinsicContentPlaceholder
+        }
+        .idealSize()
     }
 
     static var sizing: some View {
@@ -443,7 +456,6 @@ struct ListChoicePreviews: PreviewProvider {
             }
             .border(Color.cloudLight)
         }
-        .padding(.medium)
         .fixedSize(horizontal: false, vertical: true)
         .background(Color.whiteNormal)
         .previewDisplayName("Sizing")
@@ -480,7 +492,7 @@ struct ListChoicePreviews: PreviewProvider {
             ListChoice(title, description: description, icon: .airplane, disclosure: removeButton)
             ListChoice(title, description: description, icon: .airplane, value: value, disclosure: addButton)
             ListChoice(title, description: description, icon: .airplane, disclosure: removeButton) {
-                customContentPlaceholder
+                contentPlaceholder
             } headerContent: {
                 headerContent
             }
@@ -500,7 +512,7 @@ struct ListChoicePreviews: PreviewProvider {
             ListChoice(title, description: description, icon: .airplane, disclosure: checkedCheckbox)
             ListChoice(title, description: description, icon: .airplane, value: value, disclosure: uncheckedCheckbox)
             ListChoice(title, description: description, icon: .airplane, disclosure: checkedCheckbox) {
-                customContentPlaceholder
+                contentPlaceholder
             } headerContent: {
                 headerContent
             }
@@ -523,7 +535,7 @@ struct ListChoicePreviews: PreviewProvider {
                 disclosure: .radio(isChecked: false),
                 action: {}
             ) {
-                customContentPlaceholder
+                contentPlaceholder
             } headerContent: {
                 headerContent
             }
@@ -544,7 +556,7 @@ struct ListChoicePreviews: PreviewProvider {
                 badge
             })
             ListChoice(disclosure: .none) {
-                customContentPlaceholder
+                contentPlaceholder
             } headerContent: {
                 headerContent
             }

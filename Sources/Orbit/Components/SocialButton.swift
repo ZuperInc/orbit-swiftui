@@ -6,10 +6,12 @@ import SwiftUI
 /// Don’t use them in any other case or in any complex scenarios.
 ///
 /// - Note: [Orbit definition](https://orbit.kiwi/components/socialbutton/)
-/// - Important: Component expands horizontally to infinity.
+/// - Important: Component expands horizontally unless prevented by `fixedSize` or `idealSize` modifier.
 public struct SocialButton: View {
 
     @Environment(\.sizeCategory) var sizeCategory
+    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.idealSize) var idealSize
 
     let label: String
     let service: Service
@@ -30,14 +32,37 @@ public struct SocialButton: View {
                     Text(label, size: .normal, color: nil, weight: .medium)
                         .padding(.vertical, Button.Size.default.verticalPadding)
 
-                    Spacer(minLength: 0)
+                    if idealSize.horizontal == false {
+                        Spacer(minLength: 0)
+                    }
 
                     Icon(.chevronRight, size: .large, color: nil)
                 }
+                .foregroundColor(labelColor)
             }
         )
-        .buttonStyle(OrbitStyle(service: service))
-        .fixedSize(horizontal: false, vertical: true)
+        .buttonStyle(OrbitStyle(backgroundColor: backgroundColor, idealSize: idealSize))
+    }
+
+    var labelColor: Color {
+        switch service {
+            case .apple:        return colorScheme == .light ? .white : .black
+            case .google:       return .inkNormal
+            case .facebook:     return .inkNormal
+            case .email:        return .inkNormal
+        }
+    }
+
+    var backgroundColor: OrbitStyle.BackgroundColor {
+        switch service {
+            case .apple:        return (
+                colorScheme == .light ? .black : .white,
+                colorScheme == .light ? .inkLightActive : .inkLightActive
+            )
+            case .google:       return (.cloudDark, .cloudNormalActive)
+            case .facebook:     return (.cloudDark, .cloudNormalActive)
+            case .email:        return (.cloudDark, .cloudNormalActive)
+        }
     }
 }
 
@@ -69,8 +94,6 @@ extension SocialButton {
 
     public enum Service {
 
-        typealias BackgroundColor = (normal: Color, active: Color)
-
         case apple
         case google
         case facebook
@@ -82,7 +105,6 @@ extension SocialButton {
                     if #available(iOS 14.0, *) {
                         SocialButton.appleLogo
                             .font(.body)
-                            .foregroundColor(.whiteNormal)
                             .padding(.horizontal, .xxxSmall)
                             .padding(.bottom, .xxSmall)
                     } else {
@@ -93,37 +115,21 @@ extension SocialButton {
                 case .email:                                Icon(.email, size: .large)
             }
         }
-
-        var backgroundColor: BackgroundColor {
-            switch self {
-                case .apple:                                return (.black, .inkNormal)
-                case .google:                               return (.cloudDark, .cloudNormalActive)
-                case .facebook:                             return (.cloudDark, .cloudNormalActive)
-                case .email:                                return (.cloudDark, .cloudNormalActive)
-            }
-        }
-
-        var labelColor: Color {
-            switch self {
-                case .apple:                                return .whiteNormal
-                case .google:                               return .inkNormal
-                case .facebook:                             return .inkNormal
-                case .email:                                return .inkNormal
-            }
-        }
     }
 
     struct OrbitStyle: ButtonStyle {
 
-        var service: Service
+        typealias BackgroundColor = (normal: Color, active: Color)
+
+        let backgroundColor: BackgroundColor
+        let idealSize: IdealSizeValue
 
         func makeBody(configuration: Configuration) -> some View {
             configuration.label
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: idealSize.horizontal ? nil : .infinity)
                 .padding(.horizontal, .small)
-                .foregroundColor(service.labelColor)
                 .background(
-                    configuration.isPressed ? service.backgroundColor.active : service.backgroundColor.normal
+                    configuration.isPressed ? backgroundColor.active : backgroundColor.normal
                 )
                 .cornerRadius(BorderRadius.default)
         }
@@ -136,14 +142,23 @@ struct SocialButtonPreviews: PreviewProvider {
     static var previews: some View {
         PreviewWrapper {
             standalone
+            intrinsic
             storybook
+            storybook
+                .preferredColorScheme(.dark)
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
     static var standalone: some View {
         SocialButton("Sign in with Facebook", service: .facebook)
-            .padding(.medium)
+    }
+
+    static var intrinsic: some View {
+        storybook
+            .idealSize()
+            .previewDisplayName("Intrinsic")
     }
 
     static var storybook: some View {
@@ -153,11 +168,11 @@ struct SocialButtonPreviews: PreviewProvider {
             SocialButton("Sign in with Google", service: .google)
             SocialButton("Sign in with Apple", service: .apple)
         }
-        .padding(.medium)
     }
 
     static var snapshot: some View {
         storybook
+            .padding(.medium)
     }
 }
 
@@ -172,6 +187,7 @@ struct SocialButtonDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 

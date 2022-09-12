@@ -5,9 +5,15 @@
         "color-space" : "srgb",
         "components" : {
           "alpha" : "1.000",
+<<<<<<< HEAD:Sources/Orbit/Foundation/Colors/Colors.xcassets/Icon/Icon Secondary.colorset/Contents.json
           "blue" : "0x71",
           "green" : "0x5E",
           "red" : "0x4F"
+=======
+          "blue" : "0xDD",
+          "green" : "0xE4",
+          "red" : "0xB3"
+>>>>>>> main:Sources/Orbit/Foundation/Colors/Colors.xcassets/Product/Product Light Active.colorset/Contents.json
         }
       },
       "idiom" : "universal"
@@ -23,9 +29,15 @@
         "color-space" : "srgb",
         "components" : {
           "alpha" : "1.000",
+<<<<<<< HEAD:Sources/Orbit/Foundation/Colors/Colors.xcassets/Icon/Icon Secondary.colorset/Contents.json
           "blue" : "1.000",
           "green" : "1.000",
           "red" : "1.000"
+=======
+          "blue" : "0xAE",
+          "green" : "0xCA",
+          "red" : "0x00"
+>>>>>>> main:Sources/Orbit/Foundation/Colors/Colors.xcassets/Product/Product Light Active.colorset/Contents.json
         }
       },
       "idiom" : "universal"

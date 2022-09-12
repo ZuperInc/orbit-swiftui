@@ -3,8 +3,10 @@ import SwiftUI
 /// Displays a single important action a user can take.
 ///
 /// - Note: [Orbit definition](https://orbit.kiwi/components/button/)
-/// - Important: Component expands horizontally to infinity.
+/// - Important: Component expands horizontally unless prevented by `fixedSize` or `idealSize` modifier.
 public struct Button: View {
+
+    @Environment(\.idealSize) var idealSize
 
     let label: String
     let iconContent: Icon.Content
@@ -21,7 +23,7 @@ public struct Button: View {
             },
             label: {
                 HStack(spacing: 0) {
-                    if disclosureIconContent.isEmpty {
+                    if disclosureIconContent.isEmpty, idealSize.horizontal == false {
                         Spacer(minLength: 0)
                     }
 
@@ -32,7 +34,9 @@ public struct Button: View {
                             .padding(.vertical, size.verticalPadding)
                     }
 
-                    Spacer(minLength: 0)
+                    if idealSize.horizontal == false {
+                        Spacer(minLength: 0)
+                    }
 
                     TextStrut(size.textSize)
                         .padding(.vertical, size.verticalPadding)
@@ -45,7 +49,7 @@ public struct Button: View {
             }
         )
         .buttonStyle(ButtonStyle(style: style, size: size))
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: idealSize.horizontal ? nil : .infinity)
     }
 
     @ViewBuilder var text: some View {
@@ -242,8 +246,8 @@ extension Button {
 
         public var verticalPadding: CGFloat {
             switch self {
-                case .default:      return .small + 1          // Makes height exactly 44 at normal text size
-                case .small:        return .xSmall + 1/3       // Makes height exactly 32 at normal text size
+                case .default:      return .small + 1          // Results in ±44 height at normal text size
+                case .small:        return .xSmall + 1/3       // Results in ±32 height at normal text size
             }
         }
     }
@@ -298,12 +302,12 @@ struct ButtonPreviews: PreviewProvider {
             storybookGradient
             storybookMix
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
     static var standalone: some View {
         Button("Button", icon: .grid)
-            .padding(.medium)
     }
 
     static var standaloneCombinations: some View {
@@ -313,11 +317,10 @@ struct ButtonPreviews: PreviewProvider {
             Button("Button")
             Button(.grid)
             Button(.grid)
-                .fixedSize()
+                .idealSize()
             Button(.arrowUp)
-                .fixedSize()
+                .idealSize()
         }
-        .padding(.medium)
     }
 
     static var sizing: some View {
@@ -340,11 +343,10 @@ struct ButtonPreviews: PreviewProvider {
             StateWrapper(initialState: CGFloat(0)) { state in
                 ContentHeightReader(height: state) {
                     Button("Button small height \(state.wrappedValue)", icon: .grid, size: .small)
-                        .fixedSize()
+                        .idealSize()
                 }
             }
         }
-        .padding(.medium)
         .previewDisplayName("Sizing")
     }
 
@@ -356,7 +358,6 @@ struct ButtonPreviews: PreviewProvider {
             buttons(.critical)
             buttons(.criticalSubtle)
         }
-        .padding(.medium)
     }
 
     @ViewBuilder static var storybookStatus: some View {
@@ -366,7 +367,6 @@ struct ButtonPreviews: PreviewProvider {
             statusButtonStack(.warning)
             statusButtonStack(.critical)
         }
-        .padding(.medium)
     }
 
     @ViewBuilder static var storybookGradient: some View {
@@ -375,7 +375,6 @@ struct ButtonPreviews: PreviewProvider {
             buttons(.gradient(.bundleMedium)).previewDisplayName("Bundle Medium")
             buttons(.gradient(.bundleTop)).previewDisplayName("Bundle Top")
         }
-        .padding(.medium)
     }
 
     @ViewBuilder static var storybookMix: some View {
@@ -384,7 +383,6 @@ struct ButtonPreviews: PreviewProvider {
             Button("Button with Flag", icon: .countryFlag("cz"))
             Button("Button with Image", icon: .image(.orbit(.facebook)))
         }
-        .padding(.medium)
     }
 
     static var snapshot: some View {
@@ -410,13 +408,13 @@ struct ButtonPreviews: PreviewProvider {
             }
             HStack(spacing: .small) {
                 Button("Label", style: style)
-                    .fixedSize()
+                    .idealSize()
                 Button(.grid, style: style)
                 Spacer()
             }
             HStack(spacing: .small) {
                 Button("Label", style: style, size: .small)
-                    .fixedSize()
+                    .idealSize()
                 Button(.grid, style: style, size: .small)
                 Spacer()
             }
@@ -438,7 +436,7 @@ struct ButtonPreviews: PreviewProvider {
                 Button("Label", disclosureIcon: .chevronRight, style: style, size: .small)
                 Button(.grid, style: style, size: .small)
             }
-            .fixedSize()
+            .idealSize()
 
             Spacer(minLength: 0)
         }
@@ -457,6 +455,7 @@ struct ButtonDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -464,6 +463,5 @@ struct ButtonDynamicTypePreviews: PreviewProvider {
         ButtonPreviews.standaloneCombinations
         ButtonPreviews.sizing
         ButtonPreviews.buttons(.primary)
-            .padding(.medium)
     }
 }

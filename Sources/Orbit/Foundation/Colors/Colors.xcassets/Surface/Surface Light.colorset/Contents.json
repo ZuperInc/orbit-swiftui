@@ -23,9 +23,15 @@
         "color-space" : "srgb",
         "components" : {
           "alpha" : "1.000",
+<<<<<<< HEAD:Sources/Orbit/Foundation/Colors/Colors.xcassets/Surface/Surface Light.colorset/Contents.json
           "blue" : "0xFF",
           "green" : "0x59",
           "red" : "0x5C"
+=======
+          "blue" : "0xDF",
+          "green" : "0xFE",
+          "red" : "0x22"
+>>>>>>> main:Sources/Orbit/Foundation/Colors/Colors.xcassets/Product/Product Dark Active.colorset/Contents.json
         }
       },
       "idiom" : "universal"

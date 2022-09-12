@@ -35,8 +35,8 @@ public struct Skeleton: View {
                 }
             case .button(let size):
                 switch size {
-                    case .default:      roundedRectangle.fill(color).frame(height: Layout.preferredButtonHeight)
-                    case .small:        roundedRectangle.fill(color).frame(height: Layout.preferredSmallButtonHeight)
+                    case .default:      roundedRectangle.fill(color).frame(height: .xxLarge)
+                    case .small:        roundedRectangle.fill(color).frame(height: .xLarge)
                 }
             case .card(let height), .image(let height):
                 roundedRectangle.fill(color).frame(height: height)
@@ -89,8 +89,8 @@ extension Skeleton {
 
         case atomic(Atomic)
         case button(_ size: Button.Size = .default)
-        case card(height: CGFloat = 200)
-        case image(height: CGFloat = 150)
+        case card(height: CGFloat? = nil)
+        case image(height: CGFloat? = nil)
         case list(rows: Int, rowHeight: CGFloat = 20, spacing: CGFloat = .xSmall)
         case text(lines: Int, lineHeight: CGFloat = 20, spacing: CGFloat = .xSmall)
     }
@@ -132,8 +132,13 @@ struct SkeletonPreviews: PreviewProvider {
         PreviewWrapper {
             content(animation: .none)
             contentAtomic(animation: .none)
+            Skeleton(.card(), borderRadius: BorderRadius.large, animation: .none)
+                .frame(height: 100)
+            Skeleton(.image(), borderRadius: BorderRadius.large, animation: .none)
+                .frame(height: 100)
             livePreview
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -147,6 +152,7 @@ struct SkeletonPreviews: PreviewProvider {
 
     static var snapshot: some View {
         content(animation: .none)
+            .padding(.medium)
     }
 
     static func contentAtomic(animation: Skeleton.Animation = .default) -> some View {
@@ -158,19 +164,17 @@ struct SkeletonPreviews: PreviewProvider {
             Skeleton(.atomic(.rectangle), borderRadius: 20, animation: animation)
                 .frame(height: 60)
         }
-        .padding(.medium)
         .previewDisplayName("Atomic")
     }
 
     static func content(animation: Skeleton.Animation = .default) -> some View {
         VStack(alignment: .leading, spacing: .medium) {
             Skeleton(.list(rows: 3), animation: animation)
-            Skeleton(.image(), animation: animation)
-            Skeleton(.card(), animation: animation)
+            Skeleton(.image(height: 150), animation: animation)
+            Skeleton(.card(height: 200), animation: animation)
             Skeleton(.button(), animation: animation)
             Skeleton(.text(lines: 4), animation: animation)
         }
-        .padding(.medium)
     }
 
     static var livePreview: some View {
@@ -178,6 +182,5 @@ struct SkeletonPreviews: PreviewProvider {
             Heading("Loading...", style: .title3)
             content()
         }
-        .padding()
     }
 }

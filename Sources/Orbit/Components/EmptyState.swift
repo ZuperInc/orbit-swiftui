@@ -41,7 +41,7 @@ public struct EmptyState: View {
                 EmptyView()
             case .button(let label, let style, let action):
                 Button(label, style: style, action: action)
-                    .fixedSize(horizontal: true, vertical: true)
+                    .idealSize()
                     .accessibility(.emptyStateButton)
         }
     }
@@ -90,6 +90,7 @@ struct EmptyStatePreviews: PreviewProvider {
             subtle
             noAction
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -120,5 +121,6 @@ struct EmptyStatePreviews: PreviewProvider {
 
     static var snapshot: some View {
         standalone
+            .padding(.medium)
     }
 }

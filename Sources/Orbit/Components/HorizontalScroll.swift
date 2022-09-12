@@ -104,6 +104,7 @@ struct HorizontalScrollPreviews: PreviewProvider {
         PreviewWrapper {
             content
         }
+        .screenLayout()
         .previewLayout(.sizeThatFits)
     }
 
@@ -122,9 +123,8 @@ struct HorizontalScrollPreviews: PreviewProvider {
     static var storybook: some View {
         VStack(spacing: .large) {
             content
-                .background(Color.whiteNormal)
+                .background(Color.whiteDarker)
         }
-        .background(Color.cloudLight)
     }
 
     static var simpleSmallRatio: some View {
@@ -194,7 +194,7 @@ struct HorizontalScrollPreviews: PreviewProvider {
                 VStack(alignment: .leading) {
                     Text("Spacer")
                     Spacer()
-                    customContentPlaceholder
+                    contentPlaceholder
                 }
             }
 
@@ -314,7 +314,7 @@ struct HorizontalScrollPreviews: PreviewProvider {
 
     static var intrinsicContent: some View {
         intrinsicContent {
-            customContentPlaceholder
+            contentPlaceholder
         }
     }
 

@@ -3,97 +3,80 @@ import SwiftUI
 public enum TileBorderStyle {
     case none
     case `default`
-    /// A border style that visually matches the iOS plain table section appearance.
+    /// A border style that visually matches the iOS plain table section appearance in `compact` width environment.
     case iOS
+    /// A border with no elevation.
+    case plain
 }
 
 /// Provides decoration with ``Tile`` appearance.
 public struct TileBorderModifier: ViewModifier {
 
-    public enum Shadow {
-        case none
-        case `default`
-        case small
-    }
+    static let animation: Animation = .easeIn(duration: 0.15)
 
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     let style: TileBorderStyle
     let isSelected: Bool
     let status: Status?
-    let backgroundColor: Color?
-    let shadow: Shadow
 
     public func body(content: Content) -> some View {
         content
-            .background(backgroundColor)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            .shadow(color: shadowColor.opacity(shadowOpacity.primary), radius: shadowRadius.primary, x: 0, y: 0.75)
-            .shadow(color: shadowColor.opacity(shadowOpacity.secondary), radius: shadowRadius.secondary, x: 0, y: 5)
-            .overlay(
-                outerBorder
-                    .animation(.easeIn(duration: 0.1), value: isSelected)
-            )
-            .overlay(compactSeparatorBorder, alignment: .top)
-            .overlay(compactSeparatorBorder, alignment: .bottom)
+            .clipShape(clipShape)
+            .compositingGroup()
+            .elevation(elevation, shape: .roundedRectangle(borderRadius: cornerRadius))
+            .overlay(border.animation(Self.animation, value: isSelected))
+    }
+
+    @ViewBuilder var border: some View {
+        switch (style, horizontalSizeClass) {
+            case (.none, _):
+                EmptyView()
+            case (.default, _), (.plain, _), (.iOS, .regular):
+                clipShape
+                    .strokeBorder(borderColor, lineWidth: borderWidth)
+                    .blendMode(isSelected ? .normal : .darken)
+            case (.iOS, _):
+                VStack {
+                    compactSeparatorBorder
+                    Spacer()
+                    compactSeparatorBorder
+                }
+        }
     }
 
     @ViewBuilder var compactSeparatorBorder: some View {
-        if isCompact {
-            borderColor
-                .frame(height: status == nil ? 1 : BorderWidth.emphasis)
-                .animation(.easeIn(duration: 0.1), value: isSelected)
-        }
+        borderColor
+            .frame(height: status == nil ? 1 : BorderWidth.emphasis)
     }
 
-    @ViewBuilder var outerBorder: some View {
-        if isCompact == false, style != .none {
-            outerBorderShape
-                .strokeBorder(borderColor, lineWidth: borderWidth)
-                .blendMode(isSelected ? .normal : .darken)
-        }
-    }
-
-    @ViewBuilder var outerBorderShape: some InsettableShape {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+    @ViewBuilder var clipShape: some InsettableShape {
+        RoundedRectangle(cornerRadius: cornerRadius)
     }
 
     var isCompact: Bool {
         (style == .iOS) && horizontalSizeClass == .compact
     }
-    
-    var shadowRadius: (primary: CGFloat, secondary: CGFloat) {
-        switch shadow {
-            case .none:         return (0, 0)
-            case .default:      return (1.5, 6)
-            case .small:        return (2, 6)
-        }
-    }
-    
-    var shadowOpacity: (primary: CGFloat, secondary: CGFloat) {
-        switch shadow {
-            case .none:         return (0, 0)
-            case .default:      return (0.3, 0.5)
-            case .small:        return (0.5, 0.2)
-        }
-    }
 
     var cornerRadius: CGFloat {
         switch (style, horizontalSizeClass) {
             case (.default, _):     return BorderRadius.default
+            case (.plain, _):       return BorderRadius.default
             case (.iOS, .regular):  return BorderRadius.default
             case (.iOS, _):         return 0
             case (.none, _):        return 0
         }
     }
 
-    var shadowColor: Color {
-        if status != .none {
-            return .clear
+    var elevation: Elevation? {
+        guard status == .none else {
+            return nil
         }
-        
+
         switch style {
-            case .default:          return .inkNormal.opacity(0.15)
-            case .none, .iOS:       return .clear
+            case .default:
+                return .level1
+            case .none, .plain, .iOS:
+                return nil
         }
     }
 
@@ -118,24 +101,31 @@ public struct TileBorderModifier: ViewModifier {
             return .blueNormal
         }
 
-        return .cloudDark
+        return showOuterBorder ? .cloudDark : .clear
+    }
+
+    var showOuterBorder: Bool {
+        switch style {
+            case .iOS, .plain:      return true
+            case .none, .default:   return false
+        }
     }
 }
 
 public extension View {
 
-    /// Decorates content with a ``Tile`` appearance using specified style.
-    ///
-    /// - Parameter style: The style to apply. If style is nil, the view doesn’t get decorated.
+    /// Decorates content with a border similar to ``Tile`` or ``Card`` appearance using specified style.
     func tileBorder(
-        style: TileBorderStyle = .default,
+        _ style: TileBorderStyle = .default,
         isSelected: Bool = false,
-        status: Status? = nil,
-        backgroundColor: Color? = nil,
-        shadow: TileBorderModifier.Shadow = .default
+        status: Status? = nil
     ) -> some View {
         modifier(
-            TileBorderModifier(style: style, isSelected: isSelected, status: status, backgroundColor: backgroundColor, shadow: shadow)
+            TileBorderModifier(
+                style: style,
+                isSelected: isSelected,
+                status: status
+            )
         )
     }
 }
@@ -149,27 +139,32 @@ struct TileBorderModifierPreviews: PreviewProvider {
                 .tileBorder()
 
             content
-                .tileBorder(backgroundColor: .whiteNormal)
+                .tileBorder(.plain)
 
             content
-                .tileBorder(style: .iOS, backgroundColor: .whiteNormal)
+                .tileBorder(.iOS)
 
             content
-                .tileBorder(backgroundColor: .whiteNormal, shadow: .default)
+                .tileBorder(.iOS, isSelected: true)
 
             content
-                .tileBorder(backgroundColor: .blueLight, shadow: .small)
+                .background(Color.blueLight)
+                .tileBorder()
 
             content
-                .tileBorder(isSelected: true, backgroundColor: .blueLight, shadow: .small)
+                .background(Color.blueLight)
+                .tileBorder(isSelected: true)
 
             content
-                .tileBorder(status: .critical, backgroundColor: .blueLight, shadow: .small)
+                .background(Color.blueLight)
+                .tileBorder(status: .critical)
 
             content
-                .tileBorder(isSelected: true, status: .critical, backgroundColor: .blueLight, shadow: .small)
+                .background(Color.blueLight)
+                .tileBorder(isSelected: true, status: .critical)
 
-            ListChoice("ListChoice")
+            ListChoice("ListChoice", showSeparator: false)
+                .fixedSize()
                 .tileBorder()
         }
         .padding(.medium)

@@ -53,7 +53,9 @@ public struct Toast: View {
 
 /// Variant of Orbit `Toast` component with no gesture handling or queue management.
 public struct ToastContent: View {
-        
+
+    @Environment(\.colorScheme) var colorScheme
+
     let description: String
     let iconContent: Icon.Content
     let progress: CGFloat
@@ -66,7 +68,7 @@ public struct ToastContent: View {
                 style: .text(weight: .regular, color: .none),
                 spacing: .xSmall
             )
-            .foregroundColor(.whiteNormal)
+            .foregroundColor(foregroundColor)
             .padding(.small)
             
             Spacer()
@@ -76,25 +78,32 @@ public struct ToastContent: View {
     }
     
     @ViewBuilder var background: some View {
-        Color.inkNormal
+        backgroundColor
             .overlay(progressIndicator, alignment: .leading)
             .clipShape(shape)
-            .shadow(
-                color: .inkLight.opacity(0.5),
-                radius: 50,
-                x: 0,
-                y: 25
-            )
+            .elevation(.level3, shape: .roundedRectangle())
     }
     
     @ViewBuilder var progressIndicator: some View {
         GeometryReader { geometry in
-            Color.inkLight
+            progressColor
                 .opacity(max(0, progress * 2 - 0.5) * 0.3)
                 .clipShape(shape)
                 .frame(width: geometry.size.width * progress, alignment: .bottomLeading)
                 .animation(ToastQueue.animationIn, value: progress)
         }
+    }
+
+    var foregroundColor: Color {
+        colorScheme == .light ? .whiteNormal : .inkNormal
+    }
+
+    var backgroundColor: Color {
+        colorScheme == .light ? .inkNormal : .whiteDarker
+    }
+
+    var progressColor: Color {
+        colorScheme == .light ? .inkLight : .cloudDark
     }
     
     var shape: some Shape {
@@ -207,6 +216,15 @@ struct ToastPreviews: PreviewProvider {
             standaloneWrapper
             storybook
         }
+        .padding(.xLarge)
+        .previewLayout(.sizeThatFits)
+
+        PreviewWrapper {
+            storybook
+                .padding(.xLarge)
+                .background(Color.screen)
+                .environment(\.colorScheme, .dark)
+        }
         .previewLayout(.sizeThatFits)
 
         PreviewWrapper {
@@ -216,12 +234,11 @@ struct ToastPreviews: PreviewProvider {
 
     static var standalone: some View {
         ToastContent(description, icon: .grid)
-            .padding(.xLarge)
+
     }
 
     static var standaloneWrapper: some View {
         ToastWrapper(description, icon: .checkCircle, progress: 0.6)
-            .padding(.xLarge)
             .previewDisplayName("ToastWrapper")
     }
 
@@ -233,7 +250,6 @@ struct ToastPreviews: PreviewProvider {
             ToastContent(description, progress: 1.1)
             ToastContent("Toast shows a brief message that's clear & understandable.", icon: .checkCircle, progress: 0.6)
         }
-        .padding(.medium)
         .padding(.top, .large)
         .padding(.bottom, .xxxLarge)
     }
@@ -257,6 +273,7 @@ struct ToastPreviews: PreviewProvider {
 
     static var snapshot: some View {
         storybook
+            .padding(.medium)
     }
 }
 
@@ -271,6 +288,7 @@ struct ToastDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.xLarge)
         .previewLayout(.sizeThatFits)
     }
 

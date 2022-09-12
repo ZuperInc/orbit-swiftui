@@ -21,11 +21,10 @@ public struct TileButtonStyle: SwiftUI.ButtonStyle {
         configuration.label
             .background(backgroundColor(isPressed: configuration.isPressed))
             .tileBorder(
-                style: style,
+                style,
                 isSelected: isSelected,
-                status: status,
-                backgroundColor: backgroundColor(isPressed: configuration.isPressed),
-                shadow: shadow(isPressed: configuration.isPressed))
+                status: status
+            )
     }
 
     func backgroundColor(isPressed: Bool) -> Color {
@@ -33,12 +32,8 @@ public struct TileButtonStyle: SwiftUI.ButtonStyle {
             case (let backgroundColor?, true):          return backgroundColor.active
             case (let backgroundColor?, false):         return backgroundColor.normal
             case (.none, true):                         return .whiteHover
-            case (.none, false):                        return .whiteNormal
+            case (.none, false):                        return .whiteDarker
         }
-    }
-
-    func shadow(isPressed: Bool) -> TileBorderModifier.Shadow {
-        isPressed ? .small : .default
     }
 }
 
@@ -50,30 +45,25 @@ public enum TileDisclosure {
     case buttonLink(_ label: String, style: ButtonLink.Style = .primary)
 }
 
-public enum TileBorder {
-    /// No border or separator applied. For custom usage inside other components.
-    case none
-    /// Border around the whole tile for standalone usage outside of ``TileGroup``.
-    case `default`
-    /// Bottom separator only. To be used inside a ``TileGroup``.
-    case separator
-}
-
 /// Groups actionable content to make it easy to scan.
 ///
 /// Can be used standalone or wrapped inside a ``TileGroup``.
 ///
 /// - Note: [Orbit definition](https://orbit.kiwi/components/tile/)
-/// - Important: Component expands horizontally to infinity up to a ``Layout/readableMaxWidth``.
+/// - Important: Component expands horizontally unless prevented by `fixedSize` or `idealSize` modifier.
 public struct Tile<Content: View>: View {
 
-    public let verticalTextPadding: CGFloat = .medium - 1/6    // Makes height exactly 52 at normal text size
+    @Environment(\.isInsideTileGroup) var isInsideTileGroup
+    @Environment(\.isTileSeparatorVisible) var isTileSeparatorVisible
+    @Environment(\.idealSize) var idealSize
+
+    public let verticalTextPadding: CGFloat = .medium - 1/6    // Results in ±52 height at normal text size
 
     let title: String
     let description: String
     let iconContent: Icon.Content
     let disclosure: TileDisclosure
-    let border: TileBorder
+    let showBorder: Bool
     let status: Status?
     let backgroundColor: BackgroundColor?
     let titleStyle: Heading.Style
@@ -104,15 +94,14 @@ public struct Tile<Content: View>: View {
                 header
                 content
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
 
-            TextStrut(.large)
-                .padding(.vertical, verticalTextPadding)
+            if idealSize.horizontal == false {
+                Spacer(minLength: 0)
+            }
 
             disclosureIcon
                 .padding(.trailing, .medium)
         }
-        .frame(maxWidth: Layout.readableMaxWidth, alignment: .leading)
         .overlay(separator, alignment: .bottom)
     }
     
@@ -132,7 +121,12 @@ public struct Tile<Content: View>: View {
                 }
                 .padding(.vertical, verticalTextPadding)
 
-                Spacer(minLength: 0)
+                TextStrut(.large)
+                    .padding(.vertical, verticalTextPadding)
+
+                if idealSize.horizontal == false {
+                    Spacer(minLength: 0)
+                }
 
                 inactiveButtonLink
             }
@@ -165,7 +159,7 @@ public struct Tile<Content: View>: View {
     }
 
     @ViewBuilder var separator: some View {
-        if border == .separator {
+        if isInsideTileGroup, isTileSeparatorVisible {
             Separator()
                 .padding(.leading, .medium)
         }
@@ -176,7 +170,7 @@ public struct Tile<Content: View>: View {
     }
     
     var tileBorderStyle: TileBorderStyle {
-        border == .default ? .default : .none
+        showBorder && isInsideTileGroup == false ? .default : .none
     }
     
     var isHeaderEmpty: Bool {
@@ -196,7 +190,7 @@ public extension Tile {
         description: String = "",
         icon: Icon.Content = .none,
         disclosure: TileDisclosure = .icon(.chevronRight),
-        border: TileBorder = .default,
+        showBorder: Bool = true,
         status: Status? = nil,
         backgroundColor: BackgroundColor? = nil,
         titleStyle: Heading.Style = .title4,
@@ -208,7 +202,7 @@ public extension Tile {
         self.description = description
         self.iconContent = icon
         self.disclosure = disclosure
-        self.border = border
+        self.showBorder = showBorder
         self.status = status
         self.backgroundColor = backgroundColor
         self.titleStyle = titleStyle
@@ -226,7 +220,7 @@ public extension Tile {
         description: String = "",
         icon: Icon.Content = .none,
         disclosure: TileDisclosure = .icon(.chevronRight),
-        border: TileBorder = .default,
+        showBorder: Bool = true,
         status: Status? = nil,
         backgroundColor: BackgroundColor? = nil,
         titleStyle: Heading.Style = .title4,
@@ -238,7 +232,7 @@ public extension Tile {
             description: description,
             icon: icon,
             disclosure: disclosure,
-            border: border,
+            showBorder: showBorder,
             status: status,
             backgroundColor: backgroundColor,
             titleStyle: titleStyle,
@@ -246,6 +240,20 @@ public extension Tile {
             action: action,
             content: { EmptyView() }
         )
+    }
+}
+
+// MARK: - Modifiers
+public extension Tile {
+
+    /// Sets the visibility of the separator associated with this tile.
+    ///
+    /// Only applies if this tile is contained in a ``TileGroup``.
+    ///
+    /// - Parameter isVisible: Whether the separator is visible or not.
+    func tileSeparator(_ isVisible: Bool) -> some View {
+        self
+            .environment(\.isTileSeparatorVisible, isVisible)
     }
 }
 
@@ -268,10 +276,12 @@ struct TilePreviews: PreviewProvider {
     static var previews: some View {
         PreviewWrapper {
             standalone
+            intrinsic
             sizing
             storybook
             storybookMix
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
@@ -298,15 +308,19 @@ struct TilePreviews: PreviewProvider {
                 }
             }
         }
-        .padding(.medium)
         .fixedSize(horizontal: false, vertical: true)
         .previewDisplayName("Sizing")
     }
 
     static var standalone: some View {
         Tile(title, description: description, icon: .grid)
-            .padding(.medium)
             .previewDisplayName("Standalone")
+    }
+
+    static var intrinsic: some View {
+        Tile(title, description: description, icon: .grid)
+            .idealSize()
+            .previewDisplayName("Intrinsic")
     }
 
     static var storybook: some View {
@@ -316,16 +330,15 @@ struct TilePreviews: PreviewProvider {
             Tile(title, description: description)
             Tile(title, description: description, icon: .airplane)
             Tile {
-                customContentPlaceholder
+                contentPlaceholder
             }
         }
-        .padding(.medium)
     }
 
     @ViewBuilder static var storybookMix: some View {
         VStack(spacing: .large) {
             Tile("Title with very very very very very long multiline text", description: descriptionMultiline, icon: .airplane) {
-                customContentPlaceholder
+                contentPlaceholder
             }
             Tile(title, description: description, icon: .symbol(.airplane, color: .blueNormal), status: .info)
             Tile("SF Symbol", description: description, icon: .sfSymbol("info.circle.fill"), status: .critical)
@@ -333,30 +346,23 @@ struct TilePreviews: PreviewProvider {
             Tile(title, description: description, icon: .airplane, disclosure: .buttonLink("Action", style: .critical))
             Tile(title, description: description, icon: .airplane, disclosure: .icon(.grid))
             Tile(disclosure: .none) {
-                customContentPlaceholder
+                contentPlaceholder
             }
             Tile("Tile with custom content", disclosure: .none) {
-                customContentPlaceholder
+                contentPlaceholder
             }
-            VStack(spacing: .medium) {
-                Tile(
-                    "Tile with no border",
-                    description: descriptionMultiline,
-                    icon: .grid,
-                    border: .none
-                )
-                Tile(
-                    "Tile with bottom separator",
-                    description: descriptionMultiline,
-                    border: .separator
-                )
-            }
+            Tile(
+                "Tile with no border",
+                description: descriptionMultiline,
+                icon: .grid,
+                showBorder: false
+            )
         }
-        .padding(.medium)
     }
 
     static var snapshot: some View {
         storybook
+            .padding(.medium)
     }
 }
 
@@ -371,6 +377,7 @@ struct TileDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 

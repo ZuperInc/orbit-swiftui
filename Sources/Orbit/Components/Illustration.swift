@@ -3,8 +3,10 @@ import SwiftUI
 /// An illustration matching Orbit name.
 ///
 /// - Note: [Orbit definition](https://orbit.kiwi/components/illustration/)
-/// - Important: The component expands horizontally to infinity in case of `.expanded` layout.
+/// - Important: The component expands horizontally to infinity in case of `frame` layout, unless prevented by `idealSize` modifier.
 public struct Illustration: View {
+
+    @Environment(\.idealSize) var idealSize
 
     let name: String
     let bundle: Bundle
@@ -13,10 +15,11 @@ public struct Illustration: View {
     public var body: some View {
         if name.isEmpty == false {
             switch layout {
-                case .frame(let minHeight, let maxHeight, let alignment):
+                case .frame(let maxHeight, let alignment):
                     resizeableImage
-                        .frame(minHeight: minHeight, idealHeight: maxHeight, maxHeight: maxHeight)
-                        .frame(maxWidth: .infinity, alignment: .init(alignment))
+                        .frame(maxHeight: maxHeight)
+                        .frame(maxWidth: idealSize.horizontal ? nil : .infinity, alignment: .init(alignment))
+                        .fixedSize(horizontal: false, vertical: true)
                 case .resizeable:
                     resizeableImage
                 case .intrinsic:
@@ -43,7 +46,8 @@ public extension Illustration {
     ///
     /// - Parameters:
     ///     - image: Orbit Illustration asset.
-    ///     - size: Sizing behavior of image content.
+    ///     - layout: Layout behavior of illustration content.
+    ///     By default, a `frame` layout is used to automatically resize the illustration and center it horizontally.
     init(
         _ image: Image,
         layout: Layout = .frame()
@@ -58,7 +62,8 @@ public extension Illustration {
     /// - Parameters:
     ///     - name: Resource name. Empty value results in no illustration.
     ///     - bundle: The bundle to search for the image resource and localization.
-    ///     - size: Sizing behavior of image content.
+    ///     - layout: Layout behavior of illustration content.
+    ///     By default, a `frame` layout is used to automatically resize the illustration and center it horizontally.
     init(
         _ name: String,
         bundle: Bundle,
@@ -72,18 +77,19 @@ public extension Illustration {
 
 // MARK: - Types
 public extension Illustration {
-    
+
+    /// Illustration layout specifies how the illustration is resized and (optionally) horizontally aligned.
     enum Layout {
-        public static let defaultMinHeight: CGFloat = 10
-        public static let defaultMaxHeight: CGFloat = 200
-        
-        /// Positions illustration, first scaled to fit height values, in a horizontally expanded frame with specified alignment.
+
+        /// Default maximal illustration height using frame layout.
+        public static let maxHeight: CGFloat = 200
+
+        /// Positions illustration, first scaled to fit the optional maxHeight, in a horizontally expanding frame with specified alignment.
         case frame(
-            minHeight: CGFloat? = Self.defaultMinHeight,
-            maxHeight: CGFloat? = Self.defaultMaxHeight,
+            maxHeight: CGFloat = maxHeight,
             alignment: HorizontalAlignment = .center
         )
-        /// Illustration with `resizable` and `scaledToFit` modifiers applied to allow further sizing.
+        /// Applies `resizable` and `scaledToFit` modifiers to allow free resizing.
         case resizeable
         /// Keeps original illustration size without applying any resize options.
         case intrinsic
@@ -98,10 +104,7 @@ struct IllustrationPreviews: PreviewProvider {
             standalone
             intrinsic
             customResource
-
-            stackFixed
-            stackExpanding
-
+            stackSmallerWidth
             snapshot
         }
         .previewLayout(.sizeThatFits)
@@ -124,7 +127,7 @@ struct IllustrationPreviews: PreviewProvider {
             .previewDisplayName("Custom image resource")
     }
     
-    static var stackFixed: some View {
+    static var stackSmallerWidth: some View {
         VStack(spacing: .medium) {
             Illustration(.womanWithPhone)
                 .border(Color.cloudDark)
@@ -132,25 +135,18 @@ struct IllustrationPreviews: PreviewProvider {
             Illustration(.womanWithPhone)
                 .border(Color.cloudDark)
         }
-        .previewDisplayName("Fixed stack")
-    }
-    
-    static var stackExpanding: some View {
-        ScrollView {
-            VStack(spacing: .medium) {
-                Illustration(.womanWithPhone)
-                    .border(Color.cloudDark)
-
-                Illustration(.womanWithPhone)
-                    .border(Color.cloudDark)
-            }
-        }
-        .previewDisplayName("Expanding stack")
+        .frame(width: 150)
+        .previewDisplayName("Smaller width")
     }
 
     static var snapshot: some View {
         VStack(alignment: .leading, spacing: .medium) {
-            Card("MaxHeight = 80") {
+            Card("Default", showBorder: false) {
+                Illustration(.womanWithPhone)
+                    .border(Color.cloudDark)
+            }
+
+            Card("MaxHeight = 80", showBorder: false) {
                 VStack {
                     Text("Frame - Center (default)", size: .small)
                     Illustration(.womanWithPhone, layout: .frame(maxHeight: 80))
@@ -177,7 +173,7 @@ struct IllustrationPreviews: PreviewProvider {
                 }
             }
 
-            Card("MaxHeight = 30") {
+            Card("MaxHeight = 30", showBorder: false) {
                 HStack {
                     VStack(alignment: .leading) {
                         Text("Leading", size: .small)
@@ -206,7 +202,7 @@ struct IllustrationPreviews: PreviewProvider {
                 }
             }
 
-            Card("Resizeable") {
+            Card("Resizeable", showBorder: false) {
                 HStack(alignment: .top, spacing: .medium) {
                     VStack(alignment: .leading) {
                         Text("Width = 80", size: .small)
@@ -231,9 +227,6 @@ struct IllustrationPreviews: PreviewProvider {
                 }
             }
         }
-        .padding(.vertical, .medium)
-        .fixedSize(horizontal: false, vertical: true)
-        .background(Color.cloudLight)
         .previewDisplayName("Mixed sizes")
     }
 

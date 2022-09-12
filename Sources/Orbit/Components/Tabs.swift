@@ -34,7 +34,7 @@ public struct Tabs<Content: View>: View {
         HStack(spacing: 0) {
             content
                 .lineLimit(lineLimit)
-                .frame(maxWidth: maxTabWidth, minHeight: Layout.preferredSmallButtonHeight, maxHeight: .infinity)
+                .frame(maxWidth: maxTabWidth, maxHeight: .infinity)
         }
         .fixedSize(horizontal: false, vertical: true)
         .hidden()
@@ -75,7 +75,7 @@ public struct Tabs<Content: View>: View {
         Tab(label, style: style)
             .foregroundColor(index == selectedIndex ? style.textColor : .inkNormal)
             .lineLimit(lineLimit)
-            .frame(maxWidth: maxTabWidth, minHeight: Layout.preferredSmallButtonHeight, maxHeight: .infinity)
+            .frame(maxWidth: maxTabWidth, maxHeight: .infinity)
             .overlay(separator(index: index, lastIndex: lastIndex), alignment: .trailing)
             .contentShape(Rectangle())
             .accessibility(addTraits: .isButton)
@@ -101,13 +101,12 @@ public struct Tabs<Content: View>: View {
 
     @ViewBuilder func activeTabBackground(style: Tab.TabStyle) -> some View {
         VStack(spacing: 0) {
-            Color.whiteNormal
+            Color.whiteDarker
             underline(style: style)
                 .frame(height: underlineHeight * sizeCategory.ratio)
         }
         .clipShape(RoundedRectangle(cornerRadius: BorderRadius.default - 1))
-        .shadow(color: .black.opacity(0.06), radius: 1, x: 0, y: 1)
-        .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 3)
+        .elevation(.level1, shape: .roundedRectangle(borderRadius: BorderRadius.default - 1))
         .padding(.xxxSmall)
     }
 
@@ -169,48 +168,46 @@ struct TabsPreviews: PreviewProvider {
     static var previews: some View {
         PreviewWrapper {
             standalone
-            product
+            standaloneIntrinsic
             intrinsicMultiline
             intrinsicSingleline
             equalMultiline
             equalSingleline
             storybookLive
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
     static var standalone: some View {
+        StateWrapper(initialState: 1) { index in
+            Tabs(selectedIndex: index) {
+                Tab("One")
+                Tab("Two")
+                Tab("Three")
+                Tab("Four")
+            }
+        }
+    }
+
+    static var standaloneIntrinsic: some View {
         StateWrapper(initialState: 1) { index in
             Tabs(selectedIndex: index, distribution: .intrinsic) {
                 Tab("One", style: .default)
                 Tab("Two", style: .default)
             }
         }
-        .padding(.medium)
     }
 
     static var storybook: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: .xLarge) {
+            standaloneIntrinsic
             standalone
-            product
             intrinsicMultiline
             intrinsicSingleline
             equalMultiline
             equalSingleline
         }
-    }
-
-    static var product: some View {
-        StateWrapper(initialState: 1) { index in
-            Tabs(selectedIndex: index) {
-                Tab("One", style: .product)
-                Tab("Two", style: .product)
-                Tab("Three", style: .product)
-                Tab("Four", style: .product)
-            }
-        }
-        .padding(.medium)
-        .previewDisplayName("Product")
     }
 
     @ViewBuilder static var intrinsicMultiline: some View {
@@ -221,7 +218,6 @@ struct TabsPreviews: PreviewProvider {
                 Tab("All", style: .underlinedGradient(.bundleTop))
             }
         }
-        .padding(.medium)
         .previewDisplayName("Intrinsic distribution, multiline")
     }
 
@@ -233,7 +229,6 @@ struct TabsPreviews: PreviewProvider {
                 Tab("All")
             }
         }
-        .padding(.medium)
         .previewDisplayName("Intrinsic distribution, no multiline")
     }
 
@@ -245,7 +240,6 @@ struct TabsPreviews: PreviewProvider {
                 Tab("All", style: .underlinedGradient(.bundleTop))
             }
         }
-        .padding(.medium)
         .previewDisplayName("Equal distribution, multiline")
     }
 
@@ -257,7 +251,6 @@ struct TabsPreviews: PreviewProvider {
                 Tab("All", style: .underlinedGradient(.bundleTop))
             }
         }
-        .padding(.medium)
         .previewDisplayName("Equal distribution, no multiline")
     }
 
@@ -276,12 +269,12 @@ struct TabsPreviews: PreviewProvider {
                 }
             }
         }
-        .padding(.medium)
         .previewDisplayName("Live Preview")
     }
 
     static var snapshot: some View {
         storybook
+            .padding(.medium)
     }
 }
 
@@ -296,12 +289,12 @@ struct TabsDynamicTypePreviews: PreviewProvider {
                 .environment(\.sizeCategory, .accessibilityExtraLarge)
                 .previewDisplayName("Dynamic Type - XL")
         }
+        .padding(.medium)
         .previewLayout(.sizeThatFits)
     }
 
     @ViewBuilder static var content: some View {
         TabsPreviews.storybook
-        TabsPreviews.product
         TabsPreviews.equalMultiline
     }
 }
