@@ -31,7 +31,7 @@ public struct TileBorderModifier: ViewModifier {
         switch (style, horizontalSizeClass) {
             case (.none, _):
                 EmptyView()
-            case (.default, _), (.plain, _), (.iOS, .regular):
+            case (.default, _), (.plain, _), (.iOS, _):
                 clipShape
                     .strokeBorder(borderColor, lineWidth: borderWidth)
                     .blendMode(isSelected ? .normal : .darken)
@@ -62,7 +62,7 @@ public struct TileBorderModifier: ViewModifier {
             case (.default, _):     return BorderRadius.default
             case (.plain, _):       return BorderRadius.default
             case (.iOS, .regular):  return BorderRadius.default
-            case (.iOS, _):         return 0
+            case (.iOS, _):         return BorderRadius.default
             case (.none, _):        return 0
         }
     }

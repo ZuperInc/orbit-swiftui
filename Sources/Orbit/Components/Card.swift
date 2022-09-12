@@ -296,21 +296,29 @@ struct CardPreviews: PreviewProvider {
     }
 
     static var cardMultilineCritical: some View {
-        Card(
-            "Card with very very very very very very long and multi-line title",
-            description: "Very very very very very long and multi-line description",
-            action: .buttonLink("ButtonLink with a long description"),
-            status: .critical
-        ) {
-            contentPlaceholder
+//        Card(
+//            "Card with very very very very very very long and multi-line title",
+//            description: "Very very very very very long and multi-line description",
+//            action: .buttonLink("ButtonLink with a long description"),
+//            status: .critical
+//        ) {
+//            contentPlaceholder
+//        }
+//        .cornerRadius(0)
+        Card(showBorder: true) {
+            VStack {
+                Text("Title 1")
+                Text("Title 2")
+            }
         }
+        .padding(.horizontal, 10)
     }
     
     static var clear: some View {
         Card(
             "Card without borders and background",
             headerSpacing: .xSmall,
-            showBorder: false,
+            showBorder: true,
             backgroundColor: .clear,
             contentLayout: .fill
         ) {
