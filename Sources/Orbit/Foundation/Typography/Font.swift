@@ -114,14 +114,14 @@ public extension ContentSizeCategory {
         case .medium:                               return UIDevice.current.userInterfaceIdiom == .phone ? 0.9 : 1
         case .large:                                return UIDevice.current.userInterfaceIdiom == .phone ? 1 : 1.1        // Default
         case .extraLarge:                           return UIDevice.current.userInterfaceIdiom == .phone ? 1.1 : 1.2
-        case .extraExtraLarge:                      return UIDevice.current.userInterfaceIdiom == .phone ? 1.2 : 1.35
-        case .extraExtraExtraLarge:                 return UIDevice.current.userInterfaceIdiom == .phone ? 1.35 : 1.6
+        case .extraExtraLarge:                      return UIDevice.current.userInterfaceIdiom == .phone ? 1.2 : 1.3
+        case .extraExtraExtraLarge:                 return UIDevice.current.userInterfaceIdiom == .phone ? 1.35 : 1.5
         case .accessibilityMedium:                  return UIDevice.current.userInterfaceIdiom == .phone ? 1.6 : 1.8
-        case .accessibilityLarge:                   return UIDevice.current.userInterfaceIdiom == .phone ? 1.9 : 2.2
+        case .accessibilityLarge:                   return UIDevice.current.userInterfaceIdiom == .phone ? 1.9 : 2.1
         case .accessibilityExtraLarge:              return UIDevice.current.userInterfaceIdiom == .phone ? 2.35 : 2.5
-        case .accessibilityExtraExtraLarge:         return UIDevice.current.userInterfaceIdiom == .phone ? 2.75 : 3.05
+        case .accessibilityExtraExtraLarge:         return UIDevice.current.userInterfaceIdiom == .phone ? 2.75 : 3.0
         case .accessibilityExtraExtraExtraLarge:    return UIDevice.current.userInterfaceIdiom == .phone ? 3.1 : 3.2
-        @unknown default:                           return UIDevice.current.userInterfaceIdiom == .phone ? 1 : 1.2
+        @unknown default:                           return UIDevice.current.userInterfaceIdiom == .phone ? 1 : 1.1
         }
     }
 
