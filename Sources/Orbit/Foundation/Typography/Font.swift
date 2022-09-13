@@ -116,10 +116,10 @@ public extension ContentSizeCategory {
         case .extraLarge:                           return UIDevice.current.userInterfaceIdiom == .phone ? 1.1 : 1.2
         case .extraExtraLarge:                      return UIDevice.current.userInterfaceIdiom == .phone ? 1.2 : 1.35
         case .extraExtraExtraLarge:                 return UIDevice.current.userInterfaceIdiom == .phone ? 1.35 : 1.6
-        case .accessibilityMedium:                  return UIDevice.current.userInterfaceIdiom == .phone ? 1.6 : 1.9
-        case .accessibilityLarge:                   return UIDevice.current.userInterfaceIdiom == .phone ? 1.9 : 2.35
-        case .accessibilityExtraLarge:              return UIDevice.current.userInterfaceIdiom == .phone ? 2.35 : 2.75
-        case .accessibilityExtraExtraLarge:         return UIDevice.current.userInterfaceIdiom == .phone ? 2.75 : 3.1
+        case .accessibilityMedium:                  return UIDevice.current.userInterfaceIdiom == .phone ? 1.6 : 1.8
+        case .accessibilityLarge:                   return UIDevice.current.userInterfaceIdiom == .phone ? 1.9 : 2.2
+        case .accessibilityExtraLarge:              return UIDevice.current.userInterfaceIdiom == .phone ? 2.35 : 2.5
+        case .accessibilityExtraExtraLarge:         return UIDevice.current.userInterfaceIdiom == .phone ? 2.75 : 3.05
         case .accessibilityExtraExtraExtraLarge:    return UIDevice.current.userInterfaceIdiom == .phone ? 3.1 : 3.2
         @unknown default:                           return UIDevice.current.userInterfaceIdiom == .phone ? 1 : 1.2
         }
