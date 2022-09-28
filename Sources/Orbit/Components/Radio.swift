@@ -21,8 +21,8 @@ public struct Radio: View {
             },
             label: {
                 if title.isEmpty == false || description.isEmpty == false {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Heading(title, style: .title5, color: labelColor)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(title, color: labelColor, weight: .medium)
                             .accessibility(.radioTitle)
                         Text(description, size: .small, color: descriptionColor)
                             .accessibility(.radioDescription)
@@ -36,7 +36,7 @@ public struct Radio: View {
         .disabled(state == .disabled)
     }
 
-    var labelColor: Heading.Color {
+    var labelColor: Text.Color {
         state == .disabled ? .custom(.cloudDarkerHover) : .inkNormal
     }
 
@@ -115,7 +115,7 @@ extension Radio {
                 .animation(.easeOut(duration: 0.2), value: state)
                 .animation(.easeOut(duration: 0.15), value: isChecked)
                 .alignmentGuide(.firstTextBaseline) { _ in
-                    size * 0.75
+                    size * 0.75 + 3 * (sizeCategory.controlRatio - 1)
                 }
         }
 
@@ -148,19 +148,19 @@ extension Radio {
         }
 
         var size: CGFloat {
-            Self.size * sizeCategory.ratio
+            Self.size * sizeCategory.controlRatio
         }
 
         var strokeWidth: CGFloat {
-            (isChecked ? 6 : 2) * sizeCategory.ratio
+            (isChecked ? 6 : 2) * sizeCategory.controlRatio
         }
 
         var errorStrokeWidth: CGFloat {
-            3 * sizeCategory.ratio
+            3 * sizeCategory.controlRatio
         }
 
         var indicatorStrokeWidth: CGFloat {
-            2 * sizeCategory.ratio
+            2 * sizeCategory.controlRatio
         }
     }
 }
@@ -169,7 +169,7 @@ extension Radio {
 struct RadioPreviews: PreviewProvider {
 
     static let label = "Label"
-    static let description = "Additional information for this choice"
+    static let description = "Additional information<br>for this choice"
 
     static var previews: some View {
         PreviewWrapper {

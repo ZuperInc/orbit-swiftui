@@ -21,8 +21,8 @@ public struct Checkbox: View {
             },
             label: {
                 if title.isEmpty == false || description.isEmpty == false {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Heading(title, style: .title5, color: labelColor)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(title, color: labelColor, weight: .medium)
                             .accessibility(.checkboxTitle)
                         Text(description, size: .small, color: descriptionColor)
                             .accessibility(.checkboxDescription)
@@ -36,7 +36,7 @@ public struct Checkbox: View {
         .disabled(state == .disabled)
     }
 
-    var labelColor: Heading.Color {
+    var labelColor: Text.Color {
         state == .disabled ? .custom(.cloudDarkerHover) : .inkNormal
     }
 
@@ -123,12 +123,12 @@ public extension Checkbox {
                 .animation(.easeOut(duration: 0.2), value: state)
                 .animation(.easeOut(duration: 0.15), value: isChecked)
                 .alignmentGuide(.firstTextBaseline) { _ in
-                    size * 0.75
+                    size * 0.75 + 3 * (sizeCategory.controlRatio - 1)
                 }
         }
 
         var shape: some InsettableShape {
-            RoundedRectangle(cornerRadius: BorderRadius.default * sizeCategory.ratio, style: .continuous)
+            RoundedRectangle(cornerRadius: BorderRadius.default * sizeCategory.controlRatio, style: .continuous)
         }
 
         func indicatorStrokeColor(isPressed: Bool) -> some ShapeStyle {
@@ -159,19 +159,19 @@ public extension Checkbox {
         }
 
         var size: CGFloat {
-            Self.size * sizeCategory.ratio
+            Self.size * sizeCategory.controlRatio
         }
 
         var inset: CGFloat {
-            0.5 * sizeCategory.ratio
+            0.5 * sizeCategory.controlRatio
         }
 
         var errorStrokeWidth: CGFloat {
-            3 * sizeCategory.ratio
+            3 * sizeCategory.controlRatio
         }
 
         var indicatorStrokeWidth: CGFloat {
-            2 * sizeCategory.ratio
+            2 * sizeCategory.controlRatio
         }
     }
 }
@@ -180,7 +180,7 @@ public extension Checkbox {
 struct CheckboxPreviews: PreviewProvider {
 
     static let label = "Label"
-    static let description = "Additional information for this choice"
+    static let description = "Additional information<br>for this choice"
 
     static var previews: some View {
         PreviewWrapper {
