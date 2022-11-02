@@ -8,7 +8,7 @@ struct InputContent<Content: View>: View {
     var prefix: Icon.Content = .none
     var suffix: Icon.Content = .none
     var state: InputState = .default
-    var message: MessageType = .none
+    var message: Message? = nil
     var isPressed: Bool = false
     var isEditing: Bool = false
     var suffixAction: (() -> Void)? = nil
@@ -74,17 +74,17 @@ struct InputContent<Content: View>: View {
 
     private var prefixColor: Color {
         switch state {
-            case .disabled:             return .cloudDarkerActive
+            case .disabled:             return .cloudDarkActive
             case .modified:             return .blueDark
-            case .default:              return .inkNormal
+            case .default:              return .inkDark
         }
     }
 
     private var suffixColor: Color {
         switch state {
-            case .disabled:             return .cloudDarkerActive
+            case .disabled:             return .cloudDarkActive
             case .modified:             return .blueDark
-            case .default:              return .inkLight
+            case .default:              return .inkNormal
         }
     }
 

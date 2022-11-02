@@ -9,9 +9,6 @@ jobs:
   documentation:
     runs-on: macos-12
     steps:
-    - uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '14.0.0-beta'
     - uses: actions/checkout@v3
     - name: Generate DocC
       run: |
@@ -22,7 +19,7 @@ jobs:
           OTHER_DOCC_FLAGS="--transform-for-static-hosting --hosting-base-path orbit-swiftui --output-path docs" \
           | xcpretty
     - name: Deploy to Github Pages
-      uses: JamesIves/github-pages-deploy-action@v4.4.0
+      uses: JamesIves/github-pages-deploy-action@v4.4.1
       with:
         branch: docc
         folder: docs

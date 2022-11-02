@@ -108,7 +108,7 @@ public extension BadgeList {
 
         public var iconColor: UIColor {
             switch self {
-                case .neutral:                              return .inkLight
+                case .neutral:                              return .inkNormal
                 case .status(.info):                        return .blueNormal
                 case .status(.success):                     return .greenNormal
                 case .status(.warning):                     return .orangeNormal
@@ -125,8 +125,8 @@ public extension BadgeList {
 
         var color: UIColor {
             switch self {
-                case .primary:              return .inkNormal
-                case .secondary:            return .inkLight
+                case .primary:              return .inkDark
+                case .secondary:            return .inkNormal
                 case .custom(let color):    return color
             }
         }

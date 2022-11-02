@@ -21,6 +21,7 @@ Supporting types and components under development.
 
 ### Xcode previews support
 
+- ``OrbitPreviewWrapper``
 - ``StateWrapper``
 
 ### SwiftUI environment
@@ -29,29 +30,27 @@ Supporting types and components under development.
 - ``IsExpandedKey``
 - ``IsFadeInKey``
 - ``IsTileSeparatorVisibleKey``
+- ``ScreenLayoutPaddingKey``
 
 ### Other
 
-- ``AssetNameProviding``
 - ``BarButton``
 - ``BorderWidth``
-- ``ChoiceTile``
 - ``ChoiceTileAlignment``
 - ``ChoiceTileIndicator``
 - ``ElevationShape``
-- ``FormFieldLabel``
-- ``FormFieldMessage``
-- ``FormFieldWrapper``
+- ``FieldLabel``
+- ``FieldMessage``
+- ``FieldWrapper``
 - ``InputState``
-- ``KeyValue``
 - ``KeyValueField``
 - ``Label``
-- ``MessageType``
+- ``LazyVStack``
+- ``Message``
 - ``NavigateButton``
 - ``PasswordStrengthIndicator``
 - ``Progress``
 - ``Status``
-- ``Storybook``
 
 ### Deprecated
 

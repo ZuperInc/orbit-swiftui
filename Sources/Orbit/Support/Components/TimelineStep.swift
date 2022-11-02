@@ -171,8 +171,8 @@ public enum TimelineStepStyle: Equatable {
 
     public var textColor: UIColor {
         switch self {
-            case .default:              return .inkLight
-            case .status:               return .inkNormal
+            case .default:              return .inkNormal
+            case .status:               return .inkDark
         }
     }
 }
@@ -192,6 +192,11 @@ public struct TimelineStepPreference {
 
     let bounds: Anchor<CGRect>
     let style: TimelineStepStyle
+
+    public init(bounds: Anchor<CGRect>, style: TimelineStepStyle) {
+        self.bounds = bounds
+        self.style = style
+    }
 }
 
 // MARK: - Previews
