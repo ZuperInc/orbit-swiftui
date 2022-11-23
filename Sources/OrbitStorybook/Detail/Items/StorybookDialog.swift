@@ -23,19 +23,19 @@ struct StorybookDialog {
 
     static var normal: some View {
         Dialog(
-            illustration: .noNotification,
+            imgName: Illustration.Image.noNotification.assetName,
+            bundle: .current,
             title: title1,
             description: description1,
-            buttons: .primarySecondaryAndTertiary("Main CTA", "Secondary", "Tertiary")
+            buttons: .primarySecondaryAndTertiary("Main CTA", "Secondary", "Tertiary"),layout: .frame(maxHeight:120)
         )
     }
 
     static var centered: some View {
         Dialog(
-            illustration: .noNotification,
+            imgName: Illustration.Image.noNotification.assetName,
             title: title1,
             description: description1,
-            alignment: .center,
             buttons: .primarySecondaryAndTertiary("Main CTA", "Secondary", "Tertiary")
         )
         .background(Color.whiteNormal)
@@ -43,7 +43,7 @@ struct StorybookDialog {
 
     static var critical: some View {
         Dialog(
-            illustration: .noNotification,
+            imgName: Illustration.Image.noNotification.assetName, bundle: .current,
             title: title2,
             description: description2,
             style: .critical,

@@ -18,15 +18,18 @@ struct StorybookEmptyState {
     }
 
     static var standalone: some View {
-        EmptyState(title, description: description, illustration: .noResults, action: .button(button))
+        EmptyState(title, description: description, action: .button(button),imgName: Illustration.Image.accommodation.assetName)
+            .padding(.medium)
     }
-
+    
     static var subtle: some View {
-        EmptyState(title, description: description, illustration: .error404, action: .button(button, style: .primarySubtle))
+        EmptyState(title, description: description, action: .button(button, style: .primarySubtle),imgName: Illustration.Image.accommodation.assetName)
+            .padding(.medium)
     }
-
+    
     static var noAction: some View {
-        EmptyState(title, description: description, illustration: .offline)
+        EmptyState(title, description: description)
+            .padding(.medium)
     }
 }
 
